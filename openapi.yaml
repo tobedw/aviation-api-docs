@@ -14,6 +14,8 @@ info:
 servers:
   - url: https://aviation-api.logostream.dev
     description: Aviation Data API
+  - url: https://airline-api.logostream.dev
+    description: Logo API
 
 security:
   - ApiKeyAuth: []
@@ -706,3 +708,224 @@ paths:
                         type: array
                         items:
                           $ref: '#/components/schemas/AircraftType'
+
+  /airlines/icao/{icao}:
+    get:
+      summary: Airline logo by ICAO
+      tags:
+        - Logo API
+      parameters:
+        - name: icao
+          in: path
+          required: true
+          schema:
+            type: string
+          example: DLH
+        - name: key
+          in: query
+          required: true
+          description: Your API key
+          schema:
+            type: string
+        - name: variant
+          in: query
+          schema:
+            type: string
+            enum: [icon-transparent, logo, logo-transparent, logo-bg-white, logo-white, tail, tail-3D]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          description: PNG output size in pixels
+          schema:
+            type: integer
+          example: 400
+      responses:
+        '200':
+          description: Logo image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Invalid API key
+
+  /airlines/iata/{iata}:
+    get:
+      summary: Airline logo by IATA
+      tags:
+        - Logo API
+      parameters:
+        - name: iata
+          in: path
+          required: true
+          schema:
+            type: string
+          example: LH
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: variant
+          in: query
+          schema:
+            type: string
+            enum: [icon-transparent, logo, logo-transparent, logo-bg-white, logo-white, tail, tail-3D]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          schema:
+            type: integer
+          example: 400
+      responses:
+        '200':
+          description: Logo image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+
+  /airports/icao/{icao}:
+    get:
+      summary: Airport logo by ICAO
+      tags:
+        - Logo API
+      parameters:
+        - name: icao
+          in: path
+          required: true
+          schema:
+            type: string
+          example: EDDF
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: variant
+          in: query
+          schema:
+            type: string
+            enum: [logo, logo-white]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Logo image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+
+  /airports/iata/{iata}:
+    get:
+      summary: Airport logo by IATA
+      tags:
+        - Logo API
+      parameters:
+        - name: iata
+          in: path
+          required: true
+          schema:
+            type: string
+          example: FRA
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: variant
+          in: query
+          schema:
+            type: string
+            enum: [logo, logo-white]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Logo image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+
+  /country/{code}:
+    get:
+      summary: Country flag
+      tags:
+        - Logo API
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: ISO 2-letter country code (case-insensitive)
+          schema:
+            type: string
+          example: de
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: aspect
+          in: query
+          schema:
+            type: string
+            enum: [1x1, 4x3]
+            default: 1x1
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Flag image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
