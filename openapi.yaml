@@ -1,0 +1,708 @@
+openapi: 3.1.0
+info:
+  title: Logostream Aviation Data API
+  version: 1.0.0
+  description: |
+    REST API for aviation data including airlines, airports, cities, countries, routes, and aircraft types.
+
+    Both the Aviation Data API and the Logo API use the same API key.
+
+    [Get your API key →](https://airline.logostream.dev)
+  contact:
+    url: https://airline.logostream.dev
+
+servers:
+  - url: https://aviation-api.logostream.dev
+    description: Aviation Data API
+
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  schemas:
+    PaginatedResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 825
+        truncated:
+          type: boolean
+          example: true
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 50
+
+    AirlineLogo:
+      type: object
+      properties:
+        icon:
+          type: string
+          example: /airlines/icao/DLH
+        logo:
+          type: string
+          example: /airlines/icao/DLH?variant=logo
+        logo_white:
+          type: string
+          example: /airlines/icao/DLH?variant=logo-white
+        tail:
+          type: string
+          example: /airlines/icao/DLH?variant=tail
+
+    AircraftType:
+      type: object
+      properties:
+        iata:
+          type: string
+          example: 32S
+        name:
+          type: string
+          example: Airbus A320 Family
+
+    Airline:
+      type: object
+      properties:
+        iata:
+          type: string
+          example: LH
+        icao:
+          type: string
+          example: DLH
+        name:
+          type: string
+          example: Lufthansa
+        marketing_name:
+          type: string
+          example: Lufthansa
+        country_code:
+          type: string
+          example: DE
+        alliance:
+          type: string
+          example: star_alliance
+          nullable: true
+        type:
+          type: string
+          example: Full service carrier
+        colors:
+          type: string
+          example: "#05164d"
+          nullable: true
+        color2:
+          type: string
+          nullable: true
+        text_color:
+          type: string
+          nullable: true
+        is_lowcost:
+          type: boolean
+        is_oneworld:
+          type: boolean
+        is_staralliance:
+          type: boolean
+        is_skyteam:
+          type: boolean
+        rating_tripadvisor:
+          type: number
+          nullable: true
+          example: 3.5
+        rating_skytrax_stars:
+          type: number
+          nullable: true
+        website:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        hq_address:
+          type: string
+          nullable: true
+        image_url:
+          type: string
+          nullable: true
+        aircraft_types:
+          type: array
+          items:
+            $ref: '#/components/schemas/AircraftType'
+        logo:
+          $ref: '#/components/schemas/AirlineLogo'
+          nullable: true
+
+    AirportLogo:
+      type: object
+      properties:
+        icon:
+          type: string
+          example: /airports/icao/EDDF
+        logo:
+          type: string
+          example: /airports/icao/EDDF?variant=logo
+        logo_white:
+          type: string
+          example: /airports/icao/EDDF?variant=logo-white
+
+    City:
+      type: object
+      properties:
+        iata_code:
+          type: string
+          example: LON
+        city_name:
+          type: string
+          example: London
+        latitude:
+          type: number
+        longitude:
+          type: number
+
+    Country:
+      type: object
+      properties:
+        code2:
+          type: string
+          example: GB
+        name:
+          type: string
+          example: United Kingdom
+        continent_code:
+          type: string
+          example: EU
+
+    Airport:
+      type: object
+      properties:
+        iata:
+          type: string
+          example: LHR
+        icao:
+          type: string
+          example: EGLL
+        name:
+          type: string
+          example: London Heathrow
+        type:
+          type: string
+          example: large_airport
+        latitude:
+          type: number
+          example: 51.4706
+        longitude:
+          type: number
+          example: -0.461941
+        elevation_ft:
+          type: integer
+          nullable: true
+        timezone:
+          type: string
+          example: Europe/London
+        passengers:
+          type: integer
+          nullable: true
+        aircraft_movements:
+          type: integer
+          nullable: true
+        cargo_tonnes:
+          type: integer
+          nullable: true
+        hub_for:
+          type: string
+          nullable: true
+        website:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        wikipedia_url:
+          type: string
+          nullable: true
+        city:
+          $ref: '#/components/schemas/City'
+          nullable: true
+        country:
+          $ref: '#/components/schemas/Country'
+          nullable: true
+        logo:
+          $ref: '#/components/schemas/AirportLogo'
+          nullable: true
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Unauthorized — provide a valid x-api-key header
+
+paths:
+  /v1/airlines:
+    get:
+      summary: List airlines
+      description: |
+        Retrieve airline profiles including colors, alliances, ratings, and fleet data.
+
+        **Community plan:** At least one filter required. Max 50 results per page.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: iata
+          in: query
+          description: IATA code(s), comma-separated
+          schema:
+            type: string
+          example: LH,BA,AF
+        - name: icao
+          in: query
+          description: ICAO code
+          schema:
+            type: string
+          example: DLH
+        - name: name
+          in: query
+          description: Fuzzy name search
+          schema:
+            type: string
+          example: Emirates
+        - name: alliance
+          in: query
+          description: Alliance filter
+          schema:
+            type: string
+            enum: [star_alliance, oneworld, skyteam]
+        - name: country_code
+          in: query
+          description: ISO 2-letter country code
+          schema:
+            type: string
+          example: DE
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Airline'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/airports:
+    get:
+      summary: List airports
+      description: |
+        Retrieve airport profiles with traffic stats, city and country data.
+
+        Results are sorted by annual passenger count (busiest first).
+
+        **Community plan:** At least one filter required. Max 50 results per page.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: iata
+          in: query
+          description: IATA code(s), comma-separated
+          schema:
+            type: string
+          example: LHR,CDG,JFK
+        - name: icao
+          in: query
+          description: ICAO code
+          schema:
+            type: string
+          example: EGLL
+        - name: city_name
+          in: query
+          description: Fuzzy city name search
+          schema:
+            type: string
+          example: London
+        - name: country_code
+          in: query
+          description: ISO 2-letter country code
+          schema:
+            type: string
+          example: DE
+        - name: major_only
+          in: query
+          description: Set to 1 to return only large airports
+          schema:
+            type: integer
+            enum: [0, 1]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Airport'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/cities:
+    get:
+      summary: List cities
+      description: |
+        Retrieve city data including coordinates, timezone, and population.
+
+        **Community plan:** At least one filter required.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: iata
+          in: query
+          description: City IATA code
+          schema:
+            type: string
+          example: LON
+        - name: name
+          in: query
+          description: Fuzzy city name search
+          schema:
+            type: string
+          example: london
+        - name: country
+          in: query
+          description: ISO 2-letter country code
+          schema:
+            type: string
+          example: GB
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            iata_code:
+                              type: string
+                            city_name:
+                              type: string
+                            state_short:
+                              type: string
+                              nullable: true
+                            state_full:
+                              type: string
+                              nullable: true
+                            latitude:
+                              type: number
+                            longitude:
+                              type: number
+                            timezone:
+                              type: string
+                            population:
+                              type: integer
+                              nullable: true
+                            wikipedia_url:
+                              type: string
+                              nullable: true
+                            country:
+                              $ref: '#/components/schemas/Country'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/countries:
+    get:
+      summary: List countries
+      description: Full list of 252 countries available on all plans without filter.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: code
+          in: query
+          description: ISO 2-letter country code
+          schema:
+            type: string
+          example: DE
+        - name: name
+          in: query
+          description: Fuzzy name search
+          schema:
+            type: string
+        - name: continent
+          in: query
+          description: Continent code
+          schema:
+            type: string
+            enum: [AF, AN, AS, EU, NA, OC, SA]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            code2:
+                              type: string
+                            code3:
+                              type: string
+                            name:
+                              type: string
+                            continent_code:
+                              type: string
+                            region:
+                              type: string
+
+  /v1/routes:
+    get:
+      summary: List routes
+      description: |
+        Flight routes with airline, frequency, duration, and cabin class data.
+
+        **At least one filter is required.**
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: departureIata
+          in: query
+          description: Departure airport IATA
+          schema:
+            type: string
+          example: FRA
+        - name: departureIcao
+          in: query
+          description: Departure airport ICAO
+          schema:
+            type: string
+          example: EDDF
+        - name: arrivalIata
+          in: query
+          description: Arrival airport IATA
+          schema:
+            type: string
+          example: LHR
+        - name: airlineIata
+          in: query
+          description: Airline IATA code
+          schema:
+            type: string
+          example: LH
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            departure_iata:
+                              type: string
+                            arrival_iata:
+                              type: string
+                            duration_min:
+                              type: integer
+                              nullable: true
+                            flights_per_week:
+                              type: integer
+                              nullable: true
+                            price:
+                              type: integer
+                              nullable: true
+                            day_mon:
+                              type: boolean
+                            day_tue:
+                              type: boolean
+                            day_wed:
+                              type: boolean
+                            day_thu:
+                              type: boolean
+                            day_fri:
+                              type: boolean
+                            day_sat:
+                              type: boolean
+                            day_sun:
+                              type: boolean
+                            airlines:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  airline_iata:
+                                    type: string
+                                  airline_name:
+                                    type: string
+                                  aircraft_codes:
+                                    type: string
+                                  class_first:
+                                    type: boolean
+                                  class_business:
+                                    type: boolean
+                                  class_economy:
+                                    type: boolean
+                                  lcc:
+                                    type: boolean
+        '400':
+          description: Missing filter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/aircraft-types:
+    get:
+      summary: List aircraft types
+      description: Full list of 74 aircraft types available on all plans.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: iata
+          in: query
+          description: IATA code(s), comma-separated
+          schema:
+            type: string
+          example: 32S,787,350
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AircraftType'
