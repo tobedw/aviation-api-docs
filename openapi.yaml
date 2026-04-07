@@ -14,7 +14,7 @@ info:
 servers:
   - url: https://aviation-api.logostream.dev
     description: Aviation Data API
-  - url: https://airline-api.logostream.dev
+  - url: https://airlines-api.logostream.dev
     description: Logo API
 
 security:
@@ -49,16 +49,16 @@ components:
       properties:
         icon:
           type: string
-          example: https://airline-api.logostream.dev/airlines/icao/DLH
+          example: https://airlines-api.logostream.dev/airlines/icao/DLH
         logo:
           type: string
-          example: https://airline-api.logostream.dev/airlines/icao/DLH?variant=logo
+          example: https://airlines-api.logostream.dev/airlines/icao/DLH?variant=logo
         logo_white:
           type: string
-          example: https://airline-api.logostream.dev/airlines/icao/DLH?variant=logo-white
+          example: https://airlines-api.logostream.dev/airlines/icao/DLH?variant=logo-white
         tail:
           type: string
-          example: https://airline-api.logostream.dev/airlines/icao/DLH?variant=tail
+          example: https://airlines-api.logostream.dev/airlines/icao/DLH?variant=tail
 
     AircraftType:
       type: object
@@ -145,13 +145,13 @@ components:
       properties:
         icon:
           type: string
-          example: https://airline-api.logostream.dev/airports/icao/EDDF
+          example: https://airlines-api.logostream.dev/airports/icao/EDDF
         logo:
           type: string
-          example: https://airline-api.logostream.dev/airports/icao/EDDF?variant=logo
+          example: https://airlines-api.logostream.dev/airports/icao/EDDF?variant=logo
         logo_white:
           type: string
-          example: https://airline-api.logostream.dev/airports/icao/EDDF?variant=logo-white
+          example: https://airlines-api.logostream.dev/airports/icao/EDDF?variant=logo-white
 
     City:
       type: object
@@ -711,7 +711,7 @@ paths:
 
   /airlines/icao/{icao}:
     servers:
-      - url: https://airline-api.logostream.dev
+      - url: https://airlines-api.logostream.dev
     get:
       summary: Airline logo by ICAO
       tags:
@@ -763,7 +763,7 @@ paths:
 
   /airlines/iata/{iata}:
     servers:
-      - url: https://airline-api.logostream.dev
+      - url: https://airlines-api.logostream.dev
     get:
       summary: Airline logo by IATA
       tags:
@@ -811,7 +811,7 @@ paths:
 
   /airports/icao/{icao}:
     servers:
-      - url: https://airline-api.logostream.dev
+      - url: https://airlines-api.logostream.dev
     get:
       summary: Airport logo by ICAO
       tags:
@@ -854,7 +854,7 @@ paths:
 
   /airports/iata/{iata}:
     servers:
-      - url: https://airline-api.logostream.dev
+      - url: https://airlines-api.logostream.dev
     get:
       summary: Airport logo by IATA
       tags:
@@ -897,7 +897,7 @@ paths:
 
   /country/{code}:
     servers:
-      - url: https://airline-api.logostream.dev
+      - url: https://airlines-api.logostream.dev
     get:
       summary: Country flag
       tags:

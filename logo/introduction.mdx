@@ -3,7 +3,7 @@ title: Logo API
 description: SVG and PNG logos for airlines, airports, and country flags.
 ---
 
-**Base URL:** `https://airline-api.logostream.dev`
+**Base URL:** `https://airlines-api.logostream.dev`
 
 The Logo API serves airline logos, airport logos, and country flags from a CDN-backed asset store. Assets are edge-cached globally for fast delivery.
 
@@ -12,7 +12,7 @@ The Logo API serves airline logos, airport logos, and country flags from a CDN-b
 The API key is passed as a query parameter:
 
 ```
-https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
+https://airlines-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
 ```
 
 <Note>
@@ -38,10 +38,10 @@ https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
 
 ```bash
 # SVG (default)
-https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
+https://airlines-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
 
 # PNG at 200px
-https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&format=png&size=200
+https://airlines-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&format=png&size=200
 ```
 
 ### Plan restrictions
@@ -73,7 +73,7 @@ const airline = data[0]
 // }
 
 // 3. Build the full Logo API URL:
-const logoUrl = `https://airline-api.logostream.dev${airline.logo.icon}?key=${YOUR_LOGO_API_KEY}`
+const logoUrl = `https://airlines-api.logostream.dev${airline.logo.icon}?key=${YOUR_LOGO_API_KEY}`
 
 // 4. Use directly in an <img> tag:
 // <img src={logoUrl} />

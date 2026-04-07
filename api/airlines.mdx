@@ -131,8 +131,8 @@ curl "https://aviation-api.logostream.dev/v1/airlines?country_code=DE" \
 | `logo_white` | `/airlines/icao/{ICAO}?variant=logo-white` |
 | `tail` | `/airlines/icao/{ICAO}?variant=tail` |
 
-Prepend `https://airline-api.logostream.dev` and append `?key=YOUR_API_KEY` to build the full URL:
+Prepend `https://airlines-api.logostream.dev` and append `?key=YOUR_API_KEY` to build the full URL:
 
 ```javascript
-const logo = `https://airline-api.logostream.dev${airline.logo.icon}?key=YOUR_API_KEY`
+const logo = `https://airlines-api.logostream.dev${airline.logo.icon}?key=YOUR_API_KEY`
 ```
