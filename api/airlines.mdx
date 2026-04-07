@@ -1,0 +1,122 @@
+---
+title: Airlines
+description: Retrieve airline profiles including colors, alliances, ratings, and fleet data.
+---
+
+## Endpoint
+
+```
+GET /v1/airlines
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `iata` | string | IATA code(s), comma-separated: `LH` or `LH,BA,AF` |
+| `icao` | string | ICAO code: `DLH` |
+| `name` | string | Fuzzy name search: `Emirates` |
+| `alliance` | string | Alliance filter: `star_alliance`, `oneworld`, `skyteam` |
+| `country_code` | string | ISO 2-letter country code: `DE` |
+| `limit` | integer | Results per page (default: `50`) |
+| `offset` | integer | Pagination offset (default: `0`) |
+
+<Note>
+  Querying without any filter (bulk download) requires a Startup plan or above.
+</Note>
+
+## Examples
+
+<CodeGroup>
+
+```bash Single airline
+curl "https://aviation-api.logostream.com/v1/airlines?iata=LH" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Multiple airlines
+curl "https://aviation-api.logostream.com/v1/airlines?iata=LH,BA,AF,DL,AA" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Search by name
+curl "https://aviation-api.logostream.com/v1/airlines?name=Emirates" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash By alliance
+curl "https://aviation-api.logostream.com/v1/airlines?alliance=star_alliance" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash By country
+curl "https://aviation-api.logostream.com/v1/airlines?country_code=DE" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "iata": "LH",
+      "icao": "DLH",
+      "name": "Lufthansa",
+      "marketing_name": "Lufthansa",
+      "country_code": "DE",
+      "alliance": "star_alliance",
+      "type": "Full service carrier",
+      "colors": "#05164d",
+      "color2": null,
+      "text_color": "#fabf15",
+      "is_lowcost": false,
+      "is_oneworld": false,
+      "is_staralliance": true,
+      "is_skyteam": false,
+      "rating_tripadvisor": 3.5,
+      "rating_skytrax_stars": null,
+      "website": "http://www.lufthansa.com/",
+      "description": "The largest airline in Europe...",
+      "hq_address": "Von-Gablenz-Strasse 2-6, Cologne, Germany",
+      "image_url": "https://www.tripadvisor.com/img2/...",
+      "aircraft_types": [
+        { "iata": "350", "name": "Airbus A350" },
+        { "iata": "747", "name": "Boeing 747" }
+      ]
+    }
+  ],
+  "total": 1,
+  "truncated": false,
+  "page": 1,
+  "limit": 50
+}
+```
+
+## Response fields
+
+| Field | Type | Description |
+|---|---|---|
+| `iata` | string | IATA 2-letter code |
+| `icao` | string | ICAO 3-letter code |
+| `name` | string | Official airline name |
+| `marketing_name` | string | Commercial brand name |
+| `country_code` | string | ISO 2-letter country code |
+| `alliance` | string | `star_alliance`, `oneworld`, `skyteam` or `null` |
+| `type` | string | Carrier type |
+| `colors` | string | Primary brand color (hex) |
+| `color2` | string | Secondary brand color (hex) |
+| `text_color` | string | Text color on brand background (hex) |
+| `is_lowcost` | boolean | Low-cost carrier flag |
+| `is_oneworld` | boolean | oneworld member |
+| `is_staralliance` | boolean | Star Alliance member |
+| `is_skyteam` | boolean | SkyTeam member |
+| `rating_tripadvisor` | number | TripAdvisor rating (1–5) |
+| `rating_skytrax_stars` | number | Skytrax star rating |
+| `website` | string | Official website URL |
+| `description` | string | Airline description |
+| `hq_address` | string | Headquarters address |
+| `image_url` | string | Airline logo image URL |
+| `aircraft_types` | array | `[{iata, name}]` — fleet types |

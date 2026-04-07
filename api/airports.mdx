@@ -1,0 +1,121 @@
+---
+title: Airports
+description: Retrieve airport profiles with traffic stats, city and country data.
+---
+
+## Endpoint
+
+```
+GET /v1/airports
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `iata` | string | IATA code(s), comma-separated: `LHR` or `LHR,CDG,JFK` |
+| `icao` | string | ICAO code: `EGLL` |
+| `city_name` | string | Fuzzy city name search: `London` |
+| `country_code` | string | ISO 2-letter country code: `DE` |
+| `major_only` | integer | Set to `1` to return only large airports |
+| `limit` | integer | Results per page (default: `50`) |
+| `offset` | integer | Pagination offset (default: `0`) |
+
+Results are sorted by annual passenger count (busiest first) when using filters or bulk queries.
+
+<Note>
+  Querying without any filter (bulk download) requires a Startup plan or above.
+</Note>
+
+## Examples
+
+<CodeGroup>
+
+```bash Single airport
+curl "https://aviation-api.logostream.com/v1/airports?iata=LHR" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Multiple airports
+curl "https://aviation-api.logostream.com/v1/airports?iata=LHR,CDG,JFK,NRT,SIN" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Airports by city
+curl "https://aviation-api.logostream.com/v1/airports?city_name=London" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Major airports in Germany
+curl "https://aviation-api.logostream.com/v1/airports?country_code=DE&major_only=1" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "iata": "LHR",
+      "icao": "EGLL",
+      "name": "London Heathrow",
+      "type": "large_airport",
+      "latitude": 51.4706,
+      "longitude": -0.461941,
+      "elevation_ft": 83,
+      "timezone": "Europe/London",
+      "passengers": 79200000,
+      "aircraft_movements": 472296,
+      "cargo_tonnes": 1734019,
+      "hub_for": "British Airways, Virgin Atlantic",
+      "terminals": "5",
+      "website": "https://www.heathrow.com",
+      "phone": "+44 844 335 1801",
+      "description": "...",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Heathrow_Airport",
+      "city": {
+        "iata_code": "LON",
+        "city_name": "London",
+        "latitude": 51.5085,
+        "longitude": -0.1257
+      },
+      "country": {
+        "code2": "GB",
+        "name": "United Kingdom",
+        "continent_code": "EU"
+      }
+    }
+  ],
+  "total": 1,
+  "truncated": false,
+  "page": 1,
+  "limit": 50
+}
+```
+
+## Response fields
+
+| Field | Type | Description |
+|---|---|---|
+| `iata` | string | IATA 3-letter code |
+| `icao` | string | ICAO 4-letter code |
+| `name` | string | Airport name |
+| `type` | string | `large_airport`, `medium_airport`, `small_airport`, `heliport`, `seaplane_base` |
+| `latitude` | number | Decimal latitude |
+| `longitude` | number | Decimal longitude |
+| `elevation_ft` | integer | Elevation above sea level in feet |
+| `timezone` | string | IANA timezone (e.g. `Europe/London`) |
+| `passengers` | integer | Annual passenger count |
+| `aircraft_movements` | integer | Annual aircraft movements |
+| `cargo_tonnes` | integer | Annual cargo volume in tonnes |
+| `hub_for` | string | Airlines using this airport as a hub |
+| `terminals` | string | Terminal count or names |
+| `website` | string | Official airport website |
+| `phone` | string | Contact phone number |
+| `description` | string | Airport description |
+| `wikipedia_url` | string | Wikipedia article URL |
+| `city` | object | `{iata_code, city_name, latitude, longitude}` |
+| `country` | object | `{code2, name, continent_code}` |

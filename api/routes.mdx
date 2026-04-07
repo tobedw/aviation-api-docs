@@ -1,0 +1,129 @@
+---
+title: Routes
+description: Retrieve flight routes with airline, frequency, duration, and cabin class data.
+---
+
+## Endpoint
+
+```
+GET /v1/routes
+```
+
+<Warning>
+  At least one filter parameter is required.
+</Warning>
+
+## Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `departureIata` | string | Departure airport IATA: `FRA` |
+| `departureIcao` | string | Departure airport ICAO: `EDDF` |
+| `arrivalIata` | string | Arrival airport IATA: `LHR` |
+| `airlineIata` | string | Airline IATA code: `LH` |
+| `limit` | integer | Results per page (default: `50`) |
+| `offset` | integer | Pagination offset (default: `0`) |
+
+Parameters can be combined, e.g. `departureIata=FRA&arrivalIata=JFK` to look up a specific route.
+
+## Examples
+
+<CodeGroup>
+
+```bash All routes from Frankfurt
+curl "https://aviation-api.logostream.com/v1/routes?departureIata=FRA" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Specific route
+curl "https://aviation-api.logostream.com/v1/routes?departureIata=FRA&arrivalIata=JFK" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash All Lufthansa routes
+curl "https://aviation-api.logostream.com/v1/routes?airlineIata=LH" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash All routes to London Heathrow
+curl "https://aviation-api.logostream.com/v1/routes?arrivalIata=LHR" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "departure_iata": "FRA",
+      "departure_icao": "EDDF",
+      "arrival_iata": "JFK",
+      "arrival_icao": "KJFK",
+      "duration_min": 510,
+      "flights_per_week": 14,
+      "flights_per_day": "2 flights",
+      "price": 489,
+      "day_mon": true,
+      "day_tue": true,
+      "day_wed": true,
+      "day_thu": true,
+      "day_fri": true,
+      "day_sat": true,
+      "day_sun": true,
+      "first_flight": "1960-01-01",
+      "last_flight": null,
+      "airlines": [
+        {
+          "airline_iata": "LH",
+          "airline_name": "Lufthansa",
+          "aircraft_codes": "340,350,747",
+          "class_first": true,
+          "class_business": true,
+          "class_economy": true,
+          "lcc": false,
+          "is_new": false,
+          "first_flight": "1960-01-01"
+        }
+      ]
+    }
+  ],
+  "total": 1,
+  "truncated": false,
+  "page": 1,
+  "limit": 50
+}
+```
+
+## Response fields
+
+| Field | Type | Description |
+|---|---|---|
+| `departure_iata` | string | Departure airport IATA |
+| `departure_icao` | string | Departure airport ICAO |
+| `arrival_iata` | string | Arrival airport IATA |
+| `arrival_icao` | string | Arrival airport ICAO |
+| `duration_min` | integer | Flight duration in minutes |
+| `flights_per_week` | integer | Weekly frequency |
+| `flights_per_day` | string | Daily frequency range |
+| `price` | integer | Approximate price in USD |
+| `day_mon` … `day_sun` | boolean | Days of operation |
+| `first_flight` | date | Date route first operated |
+| `last_flight` | date | Date route last operated (`null` = active) |
+| `airlines` | array | Airlines operating this route |
+
+**Airline object within `airlines`:**
+
+| Field | Type | Description |
+|---|---|---|
+| `airline_iata` | string | Airline IATA code |
+| `airline_name` | string | Airline name |
+| `aircraft_codes` | string | Comma-separated aircraft IATA codes (e.g. `"32S,787"`) |
+| `class_first` | boolean | First class available |
+| `class_business` | boolean | Business class available |
+| `class_economy` | boolean | Economy class available |
+| `lcc` | boolean | Low-cost carrier |
+| `is_new` | boolean | Newly added route |
+| `first_flight` | date | Date this airline started the route |
