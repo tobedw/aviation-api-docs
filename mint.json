@@ -1,6 +1,6 @@
 {
   "$schema": "https://mintlify.com/schema.json",
-  "name": "Aviation Data API",
+  "name": "Logostream Aviation Data API",
   "logo": {
     "light": "/logo-assets/light.svg",
     "dark": "/logo-assets/dark.svg"
