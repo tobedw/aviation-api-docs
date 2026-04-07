@@ -3,9 +3,14 @@ info:
   title: Logostream Aviation Data API
   version: 1.0.0
   description: |
-    REST API for aviation data including airlines, airports, cities, countries, routes, and aircraft types.
+    This reference covers two separate APIs that share the same API key:
 
-    Both the Aviation Data API and the Logo API use the same API key.
+    | API | Base URL | Purpose |
+    |-----|----------|---------|
+    | **Aviation Data API** | `aviation-api.logostream.dev` | Structured data — airlines, airports, cities, countries, routes |
+    | **Logo API** | `airlines-api.logostream.dev` | Airline logos, airport logos, country flags (image responses) |
+
+    Both APIs authenticate via the `x-api-key` header.
 
     [Get your API key →](https://airline.logostream.dev)
   contact:
@@ -13,9 +18,7 @@ info:
 
 servers:
   - url: https://aviation-api.logostream.dev
-    description: Aviation Data API
-  - url: https://airlines-api.logostream.dev
-    description: Logo API
+    description: Aviation Data API — airlines, airports, cities, countries, routes
 
 security:
   - ApiKeyAuth: []
