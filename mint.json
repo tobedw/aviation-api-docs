@@ -20,11 +20,13 @@
   "navigation": [
     {
       "group": "Getting Started",
-      "pages": ["introduction", "authentication", "rate-limits"]
+      "pages": ["introduction"]
     },
     {
       "group": "Aviation Data API",
       "pages": [
+        "data/authentication",
+        "data/rate-limits",
         "api/airlines",
         "api/airports",
         "api/cities",
@@ -36,6 +38,8 @@
     {
       "group": "Logo API",
       "pages": [
+        "logo/authentication",
+        "logo/rate-limits",
         "logo/introduction",
         "logo/airlines",
         "logo/airports",

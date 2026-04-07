@@ -1,0 +1,27 @@
+---
+title: Rate Limits & Plans
+description: Request limits and plan restrictions for the Logo API.
+---
+
+## Plans
+
+| Plan | Requests/month | Format | Max size |
+|---|---|---|---|
+| Community | 20,000 | PNG only | 200px |
+| Startup | 200,000 | PNG only | 600px |
+| Pro | 1,000,000 | SVG + PNG | Unlimited |
+| Enterprise | Unlimited | SVG + PNG | Unlimited |
+
+Limits are shared across both the Aviation Data API and the Logo API — each request on either API counts toward the same monthly limit.
+
+## Rate limit headers
+
+Every response includes:
+
+| Header | Description |
+|---|---|
+| `X-RateLimit-Limit` | Total requests allowed this month |
+| `X-RateLimit-Remaining` | Requests remaining this month |
+| `X-RateLimit-Reset` | Reset date (`YYYY-MM-DD`) |
+
+Limits reset automatically on the 1st of each month.

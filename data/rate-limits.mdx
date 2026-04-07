@@ -7,10 +7,10 @@ description: Request limits, pagination caps, and plan comparison.
 
 | Plan | Requests/month | Max page size | Bulk download |
 |---|---|---|---|
-| Community | 1,000 | 50 | Filter required |
-| Startup | 10,000 | 100 | ✅ |
-| Pro | 100,000 | 500 | ✅ |
-| Enterprise | 1,000,000 | 500 | ✅ |
+| Community | 20,000 | 50 | Filter required |
+| Startup | 200,000 | 100 | ✅ |
+| Pro | 1,000,000 | 500 | ✅ |
+| Enterprise | Unlimited | 500 | ✅ |
 
 **Bulk download** means querying an endpoint without any filter. On the Community plan, at least one filter is required for `/v1/airlines`, `/v1/airports`, and `/v1/cities`.
 
@@ -26,8 +26,8 @@ Every response includes:
 
 ```bash
 HTTP/1.1 200 OK
-X-RateLimit-Limit: 10000
-X-RateLimit-Remaining: 9873
+X-RateLimit-Limit: 20000
+X-RateLimit-Remaining: 19873
 X-RateLimit-Reset: 2026-05-01
 ```
 
@@ -51,3 +51,12 @@ GET /v1/airlines?country_code=DE&limit=50&offset=50
 | `offset` | `0` | Number of results to skip |
 
 The response always includes `total`, `page`, `limit`, and `truncated` fields so you know when to fetch the next page.
+
+## Error responses
+
+| Status | Meaning |
+|---|---|
+| `400` | Missing required filter |
+| `404` | Unknown endpoint |
+| `405` | Method not allowed (only GET) |
+| `500` | Internal server error |

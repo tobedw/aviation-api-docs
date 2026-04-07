@@ -1,67 +1,25 @@
 ---
-title: Introduction
-description: Logostream Aviation Data API for airlines, airports, cities, countries, routes, and aircraft types.
+title: Overview
+description: Logostream APIs for aviation data and airline logos.
 ---
 
-## Overview
-
-The Logostream Aviation Data API provides comprehensive data for building flight search tools, travel apps, and aviation dashboards.
-
-**Base URL**
-```
-https://aviation-api.logostream.dev
-```
-
-## What's included
+Logostream provides two complementary APIs for aviation data:
 
 <CardGroup cols={2}>
-  <Card title="Airlines" icon="plane" href="/api/airlines">
-    825+ airlines with colors, alliances, ratings, and fleet data
+  <Card title="Aviation Data API" icon="database" href="/data/authentication">
+    REST API for airlines, airports, cities, countries, routes, and aircraft types. Returns structured JSON data.
+
+    **Base URL:** `https://aviation-api.logostream.dev`
   </Card>
-  <Card title="Airports" icon="tower-broadcast" href="/api/airports">
-    41,000+ airports with traffic stats, terminals, and city/country data
-  </Card>
-  <Card title="Cities" icon="city" href="/api/cities">
-    8,600+ cities with coordinates, timezone, and population
-  </Card>
-  <Card title="Countries" icon="flag" href="/api/countries">
-    252 countries with ISO codes and continent data
-  </Card>
-  <Card title="Routes" icon="route" href="/api/routes">
-    Flight routes with airline, frequency, duration, and pricing data
-  </Card>
-  <Card title="Aircraft Types" icon="jet-fighter" href="/api/aircraft-types">
-    74 aircraft types with IATA codes
+  <Card title="Logo API" icon="image" href="/logo/authentication">
+    Direct image delivery for airline logos, airport logos, and country flags. Returns SVG or PNG assets.
+
+    **Base URL:** `https://airline-api.logostream.dev`
   </Card>
 </CardGroup>
 
-## Quick start
+## Same API key
 
-```bash
-curl "https://aviation-api.logostream.dev/v1/airlines?iata=LH" \
-  -H "x-api-key: YOUR_API_KEY"
-```
+Both APIs use the same API key — one key gives you access to everything.
 
-```json
-{
-  "data": [
-    {
-      "iata": "LH",
-      "icao": "DLH",
-      "name": "Lufthansa",
-      "country_code": "DE",
-      "alliance": "star_alliance",
-      "colors": "#05164d",
-      "rating_tripadvisor": 3.5,
-      "aircraft_types": [
-        { "iata": "350", "name": "Airbus A350" },
-        { "iata": "747", "name": "Boeing 747" }
-      ]
-    }
-  ],
-  "total": 1,
-  "truncated": false,
-  "page": 1,
-  "limit": 50
-}
-```
+[Get your API key →](https://airline.logostream.dev)

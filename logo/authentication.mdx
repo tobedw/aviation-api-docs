@@ -1,0 +1,22 @@
+---
+title: Authentication
+description: How to authenticate with the Logo API.
+---
+
+The API key is passed as a `key` query parameter directly in the URL.
+
+```bash
+https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
+```
+
+<Note>
+  Don't have an API key yet? [Get one here](https://airline.logostream.dev).
+</Note>
+
+## Error responses
+
+| Status | Meaning |
+|---|---|
+| `401` | Missing API key |
+| `403` | Invalid API key |
+| `429` | Monthly request limit reached |
