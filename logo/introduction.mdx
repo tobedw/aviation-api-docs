@@ -52,6 +52,35 @@ https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&format=png
 | Startup | PNG only | 600px |
 | Pro / Enterprise | SVG + PNG | Unlimited |
 
+## Integration with the Aviation Data API
+
+The [Airlines](/api/airlines) and [Airports](/api/airports) endpoints already return a `logo` object with ready-made paths. You don't need to construct the paths manually:
+
+```javascript
+// 1. Fetch airline data from the Aviation Data API
+const res = await fetch('https://aviation-api.logostream.dev/v1/airlines?iata=LH', {
+  headers: { 'x-api-key': YOUR_DATA_API_KEY }
+})
+const { data } = await res.json()
+const airline = data[0]
+
+// 2. airline.logo contains ready-made paths:
+// {
+//   icon:       "/airlines/icao/DLH",
+//   logo:       "/airlines/icao/DLH?variant=logo",
+//   logo_white: "/airlines/icao/DLH?variant=logo-white",
+//   tail:       "/airlines/icao/DLH?variant=tail"
+// }
+
+// 3. Build the full Logo API URL:
+const logoUrl = `https://airline-api.logostream.dev${airline.logo.icon}?key=${YOUR_LOGO_API_KEY}`
+
+// 4. Use directly in an <img> tag:
+// <img src={logoUrl} />
+```
+
+Both APIs use the same API key — your `x-api-key` works on both.
+
 ## Fallback
 
 If no logo is found, the API returns a deterministic SVG placeholder with the first 3 characters of the identifier on a colored background. The color is derived from the identifier name — same input always produces the same color.
