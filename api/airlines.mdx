@@ -120,3 +120,19 @@ curl "https://aviation-api.logostream.dev/v1/airlines?country_code=DE" \
 | `hq_address` | string | Headquarters address |
 | `image_url` | string | Airline logo image URL |
 | `aircraft_types` | array | `[{iata, name}]` — fleet types |
+| `logo` | object | Logo paths for the Logo API (see below) |
+
+### Logo object
+
+| Field | Path |
+|---|---|
+| `icon` | `/airlines/icao/{ICAO}` |
+| `logo` | `/airlines/icao/{ICAO}?variant=logo` |
+| `logo_white` | `/airlines/icao/{ICAO}?variant=logo-white` |
+| `tail` | `/airlines/icao/{ICAO}?variant=tail` |
+
+Prepend `https://airline-api.logostream.dev` and append `?key=YOUR_API_KEY` to build the full URL:
+
+```javascript
+const logo = `https://airline-api.logostream.dev${airline.logo.icon}?key=YOUR_API_KEY`
+```

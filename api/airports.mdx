@@ -119,3 +119,16 @@ curl "https://aviation-api.logostream.dev/v1/airports?country_code=DE&major_only
 | `wikipedia_url` | string | Wikipedia article URL |
 | `city` | object | `{iata_code, city_name, latitude, longitude}` |
 | `country` | object | `{code2, name, continent_code}` |
+| `logo` | object | Logo paths for the Logo API (see below) |
+
+### Logo object
+
+| Field | Path |
+|---|---|
+| `icon` | `/airports/icao/{ICAO}` |
+| `logo` | `/airports/icao/{ICAO}?variant=logo` |
+| `logo_white` | `/airports/icao/{ICAO}?variant=logo-white` |
+
+```javascript
+const logo = `https://airline-api.logostream.dev${airport.logo.icon}?key=YOUR_API_KEY`
+```
