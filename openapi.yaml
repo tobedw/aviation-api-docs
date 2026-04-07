@@ -2,6 +2,9 @@ openapi: 3.1.0
 info:
   title: Logostream Aviation Data API
   version: 1.0.0
+  x-logo:
+    url: https://aviation-api-docs.pages.dev/images/light.svg
+    altText: Logostream
   description: |
     This reference covers two separate APIs that share the same API key:
 
