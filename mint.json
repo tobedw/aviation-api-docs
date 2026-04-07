@@ -2,10 +2,9 @@
   "$schema": "https://mintlify.com/schema.json",
   "name": "Aviation Data API",
   "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
+    "light": "/logo-assets/light.svg",
+    "dark": "/logo-assets/dark.svg"
   },
-  "favicon": "/favicon.svg",
   "colors": {
     "primary": "#0066FF",
     "light": "#3385FF",
