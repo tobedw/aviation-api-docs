@@ -1,0 +1,27 @@
+---
+title: Authentication
+description: How to authenticate with the Aviation Data API.
+---
+
+All requests must include your API key in the `x-api-key` header.
+
+```bash
+curl "https://aviation-api.logostream.com/v1/airlines?iata=LH" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+<Note>
+  Don't have an API key yet? [Get one here](https://logostream.com).
+</Note>
+
+## Error responses
+
+| Status | Meaning |
+|---|---|
+| `401` | Missing or invalid API key |
+| `403` | API key inactive or plan restriction |
+| `429` | Monthly request limit reached |
+
+```json
+{ "error": "Unauthorized — provide a valid x-api-key header" }
+```

@@ -1,0 +1,75 @@
+---
+title: Countries
+description: Retrieve country data with ISO codes and continent information.
+---
+
+## Endpoint
+
+```
+GET /v1/countries
+```
+
+The full list of 252 countries is available on all plans without requiring a filter.
+
+## Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `code` | string | ISO 2-letter country code: `DE` |
+| `name` | string | Fuzzy name search: `germany` |
+| `continent` | string | Continent code: `EU` |
+| `limit` | integer | Results per page (default: `50`) |
+| `offset` | integer | Pagination offset (default: `0`) |
+
+**Continent codes:** `AF` Africa · `AN` Antarctica · `AS` Asia · `EU` Europe · `NA` North America · `OC` Oceania · `SA` South America
+
+## Examples
+
+<CodeGroup>
+
+```bash Single country
+curl "https://aviation-api.logostream.com/v1/countries?code=DE" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash All European countries
+curl "https://aviation-api.logostream.com/v1/countries?continent=EU" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Full list
+curl "https://aviation-api.logostream.com/v1/countries" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "code2": "DE",
+      "code3": "DEU",
+      "name": "Germany",
+      "continent_code": "EU",
+      "region": "Europe"
+    }
+  ],
+  "total": 1,
+  "truncated": false,
+  "page": 1,
+  "limit": 50
+}
+```
+
+## Response fields
+
+| Field | Type | Description |
+|---|---|---|
+| `code2` | string | ISO 3166-1 alpha-2 code |
+| `code3` | string | ISO 3166-1 alpha-3 code |
+| `name` | string | Country name |
+| `continent_code` | string | Continent code |
+| `region` | string | Geographic region |

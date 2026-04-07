@@ -1,0 +1,79 @@
+---
+title: Aircraft Types
+description: Retrieve aircraft type names by IATA code.
+---
+
+## Endpoint
+
+```
+GET /v1/aircraft-types
+```
+
+The full list of 74 aircraft types is available on all plans.
+
+## Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `iata` | string | IATA code(s), comma-separated: `32S` or `32S,787,350` |
+| `limit` | integer | Results per page (default: `50`) |
+| `offset` | integer | Pagination offset (default: `0`) |
+
+## Examples
+
+<CodeGroup>
+
+```bash Single type
+curl "https://aviation-api.logostream.com/v1/aircraft-types?iata=32S" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Multiple types
+curl "https://aviation-api.logostream.com/v1/aircraft-types?iata=32S,787,350,380" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Full list
+curl "https://aviation-api.logostream.com/v1/aircraft-types" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "data": [
+    { "iata": "32S", "name": "Airbus A320 Family" },
+    { "iata": "787", "name": "Boeing 787 Dreamliner" },
+    { "iata": "350", "name": "Airbus A350" }
+  ],
+  "total": 3,
+  "truncated": false,
+  "page": 1,
+  "limit": 50
+}
+```
+
+## Response fields
+
+| Field | Type | Description |
+|---|---|---|
+| `iata` | string | IATA aircraft type code |
+| `name` | string | Aircraft name |
+
+## Common codes
+
+| IATA | Aircraft |
+|---|---|
+| `32S` | Airbus A320 Family |
+| `330` | Airbus A330 |
+| `350` | Airbus A350 |
+| `380` | Airbus A380 |
+| `737` | Boeing 737 |
+| `747` | Boeing 747 |
+| `777` | Boeing 777 |
+| `787` | Boeing 787 Dreamliner |
+| `CRJ` | Bombardier CRJ |
+| `EMJ` | Embraer E-Jet |
