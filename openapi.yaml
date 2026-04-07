@@ -49,16 +49,16 @@ components:
       properties:
         icon:
           type: string
-          example: /airlines/icao/DLH
+          example: https://airline-api.logostream.dev/airlines/icao/DLH
         logo:
           type: string
-          example: /airlines/icao/DLH?variant=logo
+          example: https://airline-api.logostream.dev/airlines/icao/DLH?variant=logo
         logo_white:
           type: string
-          example: /airlines/icao/DLH?variant=logo-white
+          example: https://airline-api.logostream.dev/airlines/icao/DLH?variant=logo-white
         tail:
           type: string
-          example: /airlines/icao/DLH?variant=tail
+          example: https://airline-api.logostream.dev/airlines/icao/DLH?variant=tail
 
     AircraftType:
       type: object
@@ -145,13 +145,13 @@ components:
       properties:
         icon:
           type: string
-          example: /airports/icao/EDDF
+          example: https://airline-api.logostream.dev/airports/icao/EDDF
         logo:
           type: string
-          example: /airports/icao/EDDF?variant=logo
+          example: https://airline-api.logostream.dev/airports/icao/EDDF?variant=logo
         logo_white:
           type: string
-          example: /airports/icao/EDDF?variant=logo-white
+          example: https://airline-api.logostream.dev/airports/icao/EDDF?variant=logo-white
 
     City:
       type: object
