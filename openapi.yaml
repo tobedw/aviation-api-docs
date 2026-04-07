@@ -710,6 +710,8 @@ paths:
                           $ref: '#/components/schemas/AircraftType'
 
   /airlines/icao/{icao}:
+    servers:
+      - url: https://airline-api.logostream.dev
     get:
       summary: Airline logo by ICAO
       tags:
@@ -760,6 +762,8 @@ paths:
           description: Invalid API key
 
   /airlines/iata/{iata}:
+    servers:
+      - url: https://airline-api.logostream.dev
     get:
       summary: Airline logo by IATA
       tags:
@@ -806,6 +810,8 @@ paths:
                 format: binary
 
   /airports/icao/{icao}:
+    servers:
+      - url: https://airline-api.logostream.dev
     get:
       summary: Airport logo by ICAO
       tags:
@@ -847,6 +853,8 @@ paths:
                 format: binary
 
   /airports/iata/{iata}:
+    servers:
+      - url: https://airline-api.logostream.dev
     get:
       summary: Airport logo by IATA
       tags:
@@ -888,6 +896,8 @@ paths:
                 format: binary
 
   /country/{code}:
+    servers:
+      - url: https://airline-api.logostream.dev
     get:
       summary: Country flag
       tags:
