@@ -1,0 +1,61 @@
+---
+title: Country Flags
+description: Retrieve country flags by ISO 2-letter country code.
+---
+
+## Endpoint
+
+```
+GET /country/{code}
+```
+
+## Parameters
+
+| Parameter | Description | Example |
+|---|---|---|
+| `key` | Your API key | `?key=YOUR_API_KEY` |
+| `aspect` | Aspect ratio variant | `?aspect=4x3` |
+| `format` | `svg` or `png` | `?format=png` |
+| `size` | PNG output size in pixels | `?size=200` |
+
+### Aspect ratios
+
+| Value | Description |
+|---|---|
+| `1x1` *(default)* | Square flag |
+| `4x3` | Standard rectangular flag |
+
+## Examples
+
+<CodeGroup>
+
+```bash Square flag (SVG)
+https://airline-api.logostream.dev/country/de?key=YOUR_API_KEY
+```
+
+```bash Rectangular flag (SVG)
+https://airline-api.logostream.dev/country/de?key=YOUR_API_KEY&aspect=4x3
+```
+
+```bash PNG at 200px
+https://airline-api.logostream.dev/country/us?key=YOUR_API_KEY&format=png&size=200
+```
+
+```bash UK flag
+https://airline-api.logostream.dev/country/gb?key=YOUR_API_KEY
+```
+
+</CodeGroup>
+
+<Note>
+  Country codes are case-insensitive — `DE`, `de`, and `De` all work.
+</Note>
+
+## Response
+
+```
+Content-Type: image/svg+xml
+Cache-Control: public, max-age=31536000, immutable
+X-Asset: 1x1/de
+X-Source: R2 | TwicPics | fallback
+```

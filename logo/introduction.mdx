@@ -1,0 +1,59 @@
+---
+title: Logo API
+description: SVG and PNG logos for airlines, airports, and country flags.
+---
+
+**Base URL:** `https://airline-api.logostream.dev`
+
+The Logo API serves airline logos, airport logos, and country flags from a CDN-backed asset store. Assets are edge-cached globally for fast delivery.
+
+## Authentication
+
+The API key is passed as a query parameter:
+
+```
+https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
+```
+
+<Note>
+  Don't have an API key yet? [Get one here](https://logostream.dev).
+</Note>
+
+## Endpoints overview
+
+| Endpoint | Description |
+|---|---|
+| `/airlines/icao/{ICAO}` | Airline logo by ICAO code |
+| `/airlines/iata/{IATA}` | Airline logo by IATA code |
+| `/airports/icao/{ICAO}` | Airport logo by ICAO code |
+| `/airports/iata/{IATA}` | Airport logo by IATA code |
+| `/country/{code}` | Country flag by ISO 2-letter code |
+
+## Format & size
+
+| Parameter | Default | Description |
+|---|---|---|
+| `format` | `svg` | `svg` or `png` |
+| `size` | — | Pixel size for PNG (e.g. `200`, `600`) |
+
+```bash
+# SVG (default)
+https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
+
+# PNG at 200px
+https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&format=png&size=200
+```
+
+### Plan restrictions
+
+| Plan | Format | Max size |
+|---|---|---|
+| Community | PNG only | 200px |
+| Startup | PNG only | 600px |
+| Pro / Enterprise | SVG + PNG | Unlimited |
+
+## Fallback
+
+If no logo is found, the API returns a deterministic SVG placeholder with the first 3 characters of the identifier on a colored background. The color is derived from the identifier name — same input always produces the same color.
+
+Fallback responses have `Cache-Control: public, max-age=60` (short TTL to allow future asset additions).

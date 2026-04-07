@@ -24,7 +24,7 @@
       "pages": ["introduction", "authentication", "rate-limits"]
     },
     {
-      "group": "Endpoints",
+      "group": "Aviation Data API",
       "pages": [
         "api/airlines",
         "api/airports",
@@ -32,6 +32,15 @@
         "api/countries",
         "api/routes",
         "api/aircraft-types"
+      ]
+    },
+    {
+      "group": "Logo API",
+      "pages": [
+        "logo/introduction",
+        "logo/airlines",
+        "logo/airports",
+        "logo/flags"
       ]
     }
   ],
