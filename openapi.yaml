@@ -1,0 +1,1300 @@
+openapi: 3.1.0
+info:
+  title: Logostream Aviation Data API
+  version: 1.0.0
+  x-logo:
+    url: https://aviation-api-docs.pages.dev/images/light.svg
+    altText: Logostream
+  description: |
+    This reference covers two separate APIs that share the same API key:
+
+    | API | Base URL | Purpose |
+    |-----|----------|---------|
+    | **Aviation Data API** | `aviation-api.logostream.dev` | Structured data — airlines, airports, cities, countries, routes, maps |
+    | **Logo API** | `airlines-api.logostream.dev` | Airline logos, airport logos, country flags (image responses) |
+
+    Both APIs authenticate via the `x-api-key` header.
+
+    [Get your API key →](https://airline.logostream.dev)
+  contact:
+    url: https://airline.logostream.dev
+
+servers:
+  - url: https://aviation-api.logostream.dev
+    description: Aviation Data API — airlines, airports, cities, countries, routes
+
+security:
+  - ApiKeyAuth: []
+
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  schemas:
+    PaginatedResponse:
+      type: object
+      properties:
+        total:
+          type: integer
+          example: 825
+        truncated:
+          type: boolean
+          example: true
+        page:
+          type: integer
+          example: 1
+        limit:
+          type: integer
+          example: 50
+
+    AirlineLogo:
+      type: object
+      description: Fully qualified logo URLs including the API key. Use directly in <img> tags.
+      properties:
+        icon:
+          type: string
+          example: https://airlines-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
+        logo:
+          type: string
+          example: https://airlines-api.logostream.dev/airlines/icao/DLH?variant=logo&key=YOUR_API_KEY
+        logo_white:
+          type: string
+          example: https://airlines-api.logostream.dev/airlines/icao/DLH?variant=logo-white&key=YOUR_API_KEY
+        tail:
+          type: string
+          example: https://airlines-api.logostream.dev/airlines/icao/DLH?variant=tail&key=YOUR_API_KEY
+
+    AirportLogo:
+      type: object
+      description: Fully qualified logo URLs including the API key. Use directly in <img> tags.
+      properties:
+        icon:
+          type: string
+          example: https://airlines-api.logostream.dev/airports/icao/EDDF?key=YOUR_API_KEY
+        logo:
+          type: string
+          example: https://airlines-api.logostream.dev/airports/icao/EDDF?variant=logo&key=YOUR_API_KEY
+        logo_white:
+          type: string
+          example: https://airlines-api.logostream.dev/airports/icao/EDDF?variant=logo-white&key=YOUR_API_KEY
+
+    FleetEntry:
+      type: object
+      properties:
+        aircraft_iata:
+          type: string
+          example: 350
+        count:
+          type: integer
+          example: 25
+        has_livery:
+          type: boolean
+        aircraft_types:
+          type: object
+          properties:
+            iata:
+              type: string
+              example: 350
+            name:
+              type: string
+              example: Airbus A350
+
+    City:
+      type: object
+      properties:
+        iata_code:
+          type: string
+          example: LON
+        city_name:
+          type: string
+          example: London
+        latitude:
+          type: number
+        longitude:
+          type: number
+
+    Country:
+      type: object
+      properties:
+        code2:
+          type: string
+          example: GB
+        name:
+          type: string
+          example: United Kingdom
+        continent_code:
+          type: string
+          example: EU
+
+    Airline:
+      type: object
+      properties:
+        iata:
+          type: string
+          example: LH
+        icao:
+          type: string
+          example: DLH
+        name:
+          type: string
+          example: Lufthansa
+        marketing_name:
+          type: string
+          example: Lufthansa
+        country_code:
+          type: string
+          example: DE
+        alliance:
+          type: string
+          example: star_alliance
+          nullable: true
+        type:
+          type: string
+          example: Full service carrier
+        colors:
+          type: string
+          example: "#05164d"
+          nullable: true
+        color2:
+          type: string
+          nullable: true
+        text_color:
+          type: string
+          nullable: true
+        is_lowcost:
+          type: boolean
+        is_oneworld:
+          type: boolean
+        is_staralliance:
+          type: boolean
+        is_skyteam:
+          type: boolean
+        rating_tripadvisor:
+          type: number
+          nullable: true
+          example: 3.5
+        rating_skytrax_stars:
+          type: number
+          nullable: true
+        website:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        hq_address:
+          type: string
+          nullable: true
+        image_url:
+          type: string
+          nullable: true
+        fleet:
+          type: array
+          items:
+            $ref: '#/components/schemas/FleetEntry'
+        logo:
+          $ref: '#/components/schemas/AirlineLogo'
+          nullable: true
+
+    Airport:
+      type: object
+      properties:
+        iata:
+          type: string
+          example: LHR
+        icao:
+          type: string
+          example: EGLL
+        name:
+          type: string
+          example: London Heathrow
+        type:
+          type: string
+          example: large_airport
+        latitude:
+          type: number
+          example: 51.4706
+        longitude:
+          type: number
+          example: -0.461941
+        elevation_ft:
+          type: integer
+          nullable: true
+        timezone:
+          type: string
+          example: Europe/London
+        passengers:
+          type: integer
+          nullable: true
+        aircraft_movements:
+          type: integer
+          nullable: true
+        cargo_tonnes:
+          type: integer
+          nullable: true
+        hub_for:
+          type: string
+          nullable: true
+        terminals:
+          type: string
+          nullable: true
+        website:
+          type: string
+          nullable: true
+        phone:
+          type: string
+          nullable: true
+        address:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        wikipedia_url:
+          type: string
+          nullable: true
+        active:
+          type: boolean
+        city:
+          $ref: '#/components/schemas/City'
+          nullable: true
+        country:
+          $ref: '#/components/schemas/Country'
+          nullable: true
+        logo:
+          $ref: '#/components/schemas/AirportLogo'
+          nullable: true
+
+    AircraftType:
+      type: object
+      properties:
+        iata:
+          type: string
+          example: 787
+        icao:
+          type: string
+          example: B788
+          nullable: true
+        name:
+          type: string
+          example: Boeing 787-8 Dreamliner
+        manufacturer:
+          type: string
+          example: Boeing
+          nullable: true
+        category:
+          type: string
+          example: wide_body
+          nullable: true
+        first_flight:
+          type: string
+          format: date
+          nullable: true
+        typical_seats:
+          type: integer
+          nullable: true
+        range_km:
+          type: integer
+          nullable: true
+        wikipedia_url:
+          type: string
+          nullable: true
+        description:
+          type: string
+          nullable: true
+        airlines:
+          type: array
+          items:
+            type: object
+            properties:
+              count:
+                type: integer
+              airline:
+                type: object
+                properties:
+                  iata:
+                    type: string
+                  name:
+                    type: string
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Unauthorized — provide a valid x-api-key header
+
+paths:
+  /v1/airlines:
+    get:
+      summary: List airlines
+      description: |
+        Retrieve airline profiles including colors, alliances, ratings, and fleet data.
+
+        **Community plan:** At least one filter required. Max 50 results per page.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: iata
+          in: query
+          description: IATA code(s), comma-separated
+          schema:
+            type: string
+          example: LH,BA,AF
+        - name: icao
+          in: query
+          description: ICAO code
+          schema:
+            type: string
+          example: DLH
+        - name: name
+          in: query
+          description: Fuzzy name search
+          schema:
+            type: string
+          example: Emirates
+        - name: alliance
+          in: query
+          description: Alliance filter
+          schema:
+            type: string
+            enum: [star_alliance, oneworld, skyteam]
+        - name: country_code
+          in: query
+          description: ISO 2-letter country code
+          schema:
+            type: string
+          example: DE
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Airline'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/airports:
+    get:
+      summary: List airports
+      description: |
+        Retrieve airport profiles with traffic stats, city and country data.
+
+        Results are sorted by annual passenger count (busiest first).
+
+        **Community plan:** At least one filter required. Max 50 results per page.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: iata
+          in: query
+          description: IATA code(s), comma-separated
+          schema:
+            type: string
+          example: LHR,CDG,JFK
+        - name: icao
+          in: query
+          description: ICAO code
+          schema:
+            type: string
+          example: EGLL
+        - name: city_name
+          in: query
+          description: Fuzzy city name search
+          schema:
+            type: string
+          example: London
+        - name: country_code
+          in: query
+          description: ISO 2-letter country code
+          schema:
+            type: string
+          example: DE
+        - name: major_only
+          in: query
+          description: Set to 1 to return only large airports
+          schema:
+            type: integer
+            enum: [0, 1]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Airport'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/cities:
+    get:
+      summary: List cities
+      description: |
+        Retrieve city data including coordinates, timezone, and population.
+
+        **Community plan:** At least one filter required.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: iata
+          in: query
+          description: City IATA code
+          schema:
+            type: string
+          example: LON
+        - name: name
+          in: query
+          description: Fuzzy city name search
+          schema:
+            type: string
+          example: london
+        - name: country
+          in: query
+          description: ISO 2-letter country code
+          schema:
+            type: string
+          example: GB
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            iata_code:
+                              type: string
+                              example: LON
+                            city_name:
+                              type: string
+                              example: London
+                            state_short:
+                              type: string
+                              nullable: true
+                            state_full:
+                              type: string
+                              nullable: true
+                            latitude:
+                              type: number
+                            longitude:
+                              type: number
+                            timezone:
+                              type: string
+                            population:
+                              type: integer
+                              nullable: true
+                            popularity_score:
+                              type: integer
+                              nullable: true
+                              description: Relative travel popularity (0–100)
+                            wikipedia_url:
+                              type: string
+                              nullable: true
+                            website:
+                              type: string
+                              nullable: true
+                            country:
+                              $ref: '#/components/schemas/Country'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/countries:
+    get:
+      summary: List countries
+      description: Full list of 252 countries available on all plans without filter.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: code
+          in: query
+          description: ISO 2-letter country code
+          schema:
+            type: string
+          example: DE
+        - name: name
+          in: query
+          description: Fuzzy name search
+          schema:
+            type: string
+        - name: continent
+          in: query
+          description: Continent code
+          schema:
+            type: string
+            enum: [AF, AN, AS, EU, NA, OC, SA]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            code2:
+                              type: string
+                              example: DE
+                            code3:
+                              type: string
+                              example: DEU
+                            name:
+                              type: string
+                              example: Germany
+                            region:
+                              type: string
+                              example: Europe
+                            continent_code:
+                              type: string
+                              example: EU
+                            subregion:
+                              type: string
+                              nullable: true
+                            capital:
+                              type: string
+                              nullable: true
+                              example: Berlin
+                            capital_code:
+                              type: string
+                              nullable: true
+                              example: BER
+                            currency_code:
+                              type: string
+                              nullable: true
+                              example: EUR
+                            currency_name:
+                              type: string
+                              nullable: true
+                              example: Euro
+                            currency_symbol:
+                              type: string
+                              nullable: true
+                              example: "€"
+                            phone_code:
+                              type: string
+                              nullable: true
+                              example: "49"
+                            population:
+                              type: integer
+                              nullable: true
+                            area_km2:
+                              type: integer
+                              nullable: true
+                            landlocked:
+                              type: boolean
+                              nullable: true
+                            driving_side:
+                              type: string
+                              enum: [left, right]
+                              nullable: true
+                            timezone:
+                              type: string
+                              nullable: true
+                            tld:
+                              type: string
+                              nullable: true
+                            wikipedia_url:
+                              type: string
+                              nullable: true
+                            capital_city:
+                              type: object
+                              nullable: true
+                              properties:
+                                iata_code:
+                                  type: string
+                                city_name:
+                                  type: string
+                                latitude:
+                                  type: number
+                                longitude:
+                                  type: number
+                            flag:
+                              type: object
+                              nullable: true
+                              properties:
+                                url:
+                                  type: string
+                                  example: https://airlines-api.logostream.dev/country/DE?key=YOUR_API_KEY
+
+  /v1/routes:
+    get:
+      summary: List routes
+      description: |
+        Flight routes between airports. Returns departure/arrival IATA codes and operating airlines.
+
+        **At least one filter is required.**
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: departureIata
+          in: query
+          description: Departure airport IATA
+          schema:
+            type: string
+          example: FRA
+        - name: departureIcao
+          in: query
+          description: Departure airport ICAO
+          schema:
+            type: string
+          example: EDDF
+        - name: arrivalIata
+          in: query
+          description: Arrival airport IATA
+          schema:
+            type: string
+          example: LHR
+        - name: airlineIata
+          in: query
+          description: Airline IATA code
+          schema:
+            type: string
+          example: LH
+        - name: airlineIcao
+          in: query
+          description: Airline ICAO code
+          schema:
+            type: string
+          example: DLH
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: integer
+                            departure_iata:
+                              type: string
+                              example: FRA
+                            arrival_iata:
+                              type: string
+                              example: JFK
+                            airlines:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  airline_iata:
+                                    type: string
+                                    example: LH
+                                  airline_icao:
+                                    type: string
+                                    example: DLH
+        '400':
+          description: Missing filter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/aircraft-types:
+    get:
+      summary: List aircraft types
+      description: Aircraft types with manufacturer, range, and fleet usage data.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: iata
+          in: query
+          description: IATA code(s), comma-separated
+          schema:
+            type: string
+          example: 32S,787,350
+        - name: name
+          in: query
+          description: Fuzzy name search
+          schema:
+            type: string
+          example: Boeing
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/PaginatedResponse'
+                  - type: object
+                    properties:
+                      data:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/AircraftType'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/map/route:
+    get:
+      summary: Route map
+      description: |
+        Returns an SVG world map (1000×500 px) with a great-circle route between two airports and airport icon markers.
+
+        The response is an `image/svg+xml` image — use directly in an `<img>` tag or embed inline.
+      tags:
+        - Map API
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: Departure airport IATA code
+          schema:
+            type: string
+          example: FRA
+        - name: to
+          in: query
+          required: true
+          description: Arrival airport IATA code
+          schema:
+            type: string
+          example: JFK
+        - name: color_ocean
+          in: query
+          description: Ocean color (hex, with or without #)
+          schema:
+            type: string
+          example: 0d1b2a
+        - name: color_land
+          in: query
+          description: Land fill color (hex)
+          schema:
+            type: string
+          example: 1e3a5f
+        - name: color_route
+          in: query
+          description: Route line color (hex)
+          schema:
+            type: string
+          example: f59e0b
+        - name: color_marker
+          in: query
+          description: Marker dot color (hex)
+          schema:
+            type: string
+          example: f59e0b
+        - name: color_label
+          in: query
+          description: Label text color (hex)
+          schema:
+            type: string
+          example: ffffff
+        - name: no_icons
+          in: query
+          description: Set to 1 to hide airport icons and show dots only
+          schema:
+            type: integer
+            enum: [0, 1]
+      responses:
+        '200':
+          description: SVG map image
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: public, max-age=86400
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Airport not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/map/airports:
+    get:
+      summary: Airport map
+      description: |
+        Returns an SVG world map (1000×500 px) with up to 20 airports plotted as markers — without a route line.
+
+        The response is an `image/svg+xml` image — use directly in an `<img>` tag or embed inline.
+      tags:
+        - Map API
+      parameters:
+        - name: codes
+          in: query
+          required: true
+          description: Comma-separated IATA codes (max 20)
+          schema:
+            type: string
+          example: LHR,CDG,FRA,AMS,MAD
+        - name: color_ocean
+          in: query
+          description: Ocean color (hex)
+          schema:
+            type: string
+        - name: color_land
+          in: query
+          description: Land fill color (hex)
+          schema:
+            type: string
+        - name: color_marker
+          in: query
+          description: Marker dot color (hex)
+          schema:
+            type: string
+        - name: color_label
+          in: query
+          description: Label text color (hex)
+          schema:
+            type: string
+        - name: no_icons
+          in: query
+          description: Set to 1 to hide airport icons and show dots only
+          schema:
+            type: integer
+            enum: [0, 1]
+      responses:
+        '200':
+          description: SVG map image
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: public, max-age=86400
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /airlines/icao/{icao}:
+    servers:
+      - url: https://airlines-api.logostream.dev
+    get:
+      summary: Airline logo by ICAO
+      tags:
+        - Logo API
+      parameters:
+        - name: icao
+          in: path
+          required: true
+          schema:
+            type: string
+          example: DLH
+        - name: key
+          in: query
+          required: true
+          description: Your API key
+          schema:
+            type: string
+        - name: variant
+          in: query
+          schema:
+            type: string
+            enum: [icon-transparent, logo, logo-transparent, logo-bg-white, logo-white, tail, tail-3D]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          description: PNG output size in pixels
+          schema:
+            type: integer
+          example: 400
+      responses:
+        '200':
+          description: Logo image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '403':
+          description: Invalid API key
+
+  /airlines/iata/{iata}:
+    servers:
+      - url: https://airlines-api.logostream.dev
+    get:
+      summary: Airline logo by IATA
+      tags:
+        - Logo API
+      parameters:
+        - name: iata
+          in: path
+          required: true
+          schema:
+            type: string
+          example: LH
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: variant
+          in: query
+          schema:
+            type: string
+            enum: [icon-transparent, logo, logo-transparent, logo-bg-white, logo-white, tail, tail-3D]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          schema:
+            type: integer
+          example: 400
+      responses:
+        '200':
+          description: Logo image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+
+  /airports/icao/{icao}:
+    servers:
+      - url: https://airlines-api.logostream.dev
+    get:
+      summary: Airport logo by ICAO
+      tags:
+        - Logo API
+      parameters:
+        - name: icao
+          in: path
+          required: true
+          schema:
+            type: string
+          example: EDDF
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: variant
+          in: query
+          schema:
+            type: string
+            enum: [logo, logo-white]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Logo image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+
+  /airports/iata/{iata}:
+    servers:
+      - url: https://airlines-api.logostream.dev
+    get:
+      summary: Airport logo by IATA
+      tags:
+        - Logo API
+      parameters:
+        - name: iata
+          in: path
+          required: true
+          schema:
+            type: string
+          example: FRA
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: variant
+          in: query
+          schema:
+            type: string
+            enum: [logo, logo-white]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Logo image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+
+  /country/{code}:
+    servers:
+      - url: https://airlines-api.logostream.dev
+    get:
+      summary: Country flag
+      tags:
+        - Logo API
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: ISO 2-letter country code (case-insensitive)
+          schema:
+            type: string
+          example: de
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: aspect
+          in: query
+          schema:
+            type: string
+            enum: [1x1, 4x3]
+            default: 1x1
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Flag image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
