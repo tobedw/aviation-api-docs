@@ -3,7 +3,7 @@ title: Logo API
 description: SVG and PNG logos for airlines, airports, and country flags.
 ---
 
-**Base URL:** `https://airline-api.logostream.dev`
+**Base URL:** `https://airlines-api.logostream.dev`
 
 The Logo API serves airline logos, airport logos, and country flags from a CDN-backed asset store. Assets are edge-cached globally for fast delivery.
 
@@ -12,7 +12,7 @@ The Logo API serves airline logos, airport logos, and country flags from a CDN-b
 The API key is passed as a query parameter:
 
 ```
-https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
+https://airlines-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
 ```
 
 <Note>
@@ -38,10 +38,10 @@ https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
 
 ```bash
 # SVG (default)
-https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
+https://airlines-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
 
 # PNG at 200px
-https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&format=png&size=200
+https://airlines-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&format=png&size=200
 ```
 
 ### Plan restrictions
@@ -59,24 +59,22 @@ The [Airlines](/api/airlines) and [Airports](/api/airports) endpoints already re
 ```javascript
 // 1. Fetch airline data from the Aviation Data API
 const res = await fetch('https://aviation-api.logostream.dev/v1/airlines?iata=LH', {
-  headers: { 'x-api-key': YOUR_DATA_API_KEY }
+  headers: { 'x-api-key': YOUR_API_KEY }
 })
 const { data } = await res.json()
 const airline = data[0]
 
-// 2. airline.logo contains ready-made paths:
+// 2. airline.logo contains fully qualified URLs (API key already included):
 // {
-//   icon:       "/airlines/icao/DLH",
-//   logo:       "/airlines/icao/DLH?variant=logo",
-//   logo_white: "/airlines/icao/DLH?variant=logo-white",
-//   tail:       "/airlines/icao/DLH?variant=tail"
+//   icon:       "https://airlines-api.logostream.dev/airlines/icao/DLH?key=...",
+//   logo:       "https://airlines-api.logostream.dev/airlines/icao/DLH?variant=logo&key=...",
+//   logo_white: "https://airlines-api.logostream.dev/airlines/icao/DLH?variant=logo-white&key=...",
+//   tail:       "https://airlines-api.logostream.dev/airlines/icao/DLH?variant=tail&key=..."
 // }
 
-// 3. Build the full Logo API URL:
-const logoUrl = `https://airline-api.logostream.dev${airline.logo.icon}?key=${YOUR_LOGO_API_KEY}`
-
-// 4. Use directly in an <img> tag:
-// <img src={logoUrl} />
+// 3. Use directly — no modification needed:
+// <img src={airline.logo.icon} />
+// <img src={airline.logo.logo} />
 ```
 
 Both APIs use the same API key — your `x-api-key` works on both.

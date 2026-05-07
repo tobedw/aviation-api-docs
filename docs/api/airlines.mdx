@@ -124,15 +124,17 @@ curl "https://aviation-api.logostream.dev/v1/airlines?country_code=DE" \
 
 ### Logo object
 
-| Field | Path |
+| Field | URL |
 |---|---|
-| `icon` | `/airlines/icao/{ICAO}` |
-| `logo` | `/airlines/icao/{ICAO}?variant=logo` |
-| `logo_white` | `/airlines/icao/{ICAO}?variant=logo-white` |
-| `tail` | `/airlines/icao/{ICAO}?variant=tail` |
+| `icon` | `https://airlines-api.logostream.dev/airlines/icao/{ICAO}?key=…` |
+| `logo` | `https://airlines-api.logostream.dev/airlines/icao/{ICAO}?variant=logo&key=…` |
+| `logo_white` | `https://airlines-api.logostream.dev/airlines/icao/{ICAO}?variant=logo-white&key=…` |
+| `tail` | `https://airlines-api.logostream.dev/airlines/icao/{ICAO}?variant=tail&key=…` |
 
-The `logo` object contains fully qualified URLs — append `?key=YOUR_API_KEY` only if not already present:
+The `logo` object contains fully qualified URLs including your API key. Use them directly:
 
 ```javascript
-const iconUrl = airline.logo.icon  // already a full URL
+// Ready to use — no modification needed
+<img src={airline.logo.icon} />
+<img src={airline.logo.logo} />
 ```

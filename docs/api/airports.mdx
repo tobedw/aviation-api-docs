@@ -74,6 +74,7 @@ curl "https://aviation-api.logostream.dev/v1/airports?country_code=DE&major_only
       "terminals": "5",
       "website": "https://www.heathrow.com",
       "phone": "+44 844 335 1801",
+      "address": "Longford, Hounslow TW6 1AP, UK",
       "description": "...",
       "wikipedia_url": "https://en.wikipedia.org/wiki/Heathrow_Airport",
       "city": {
@@ -115,6 +116,7 @@ curl "https://aviation-api.logostream.dev/v1/airports?country_code=DE&major_only
 | `terminals` | string | Terminal count or names |
 | `website` | string | Official airport website |
 | `phone` | string | Contact phone number |
+| `address` | string | Physical address |
 | `description` | string | Airport description |
 | `wikipedia_url` | string | Wikipedia article URL |
 | `active` | boolean | Whether the airport is currently active |
@@ -124,14 +126,14 @@ curl "https://aviation-api.logostream.dev/v1/airports?country_code=DE&major_only
 
 ### Logo object
 
-| Field | Path |
+| Field | URL |
 |---|---|
-| `icon` | `/airports/icao/{ICAO}` |
-| `logo` | `/airports/icao/{ICAO}?variant=logo` |
-| `logo_white` | `/airports/icao/{ICAO}?variant=logo-white` |
+| `icon` | `https://airlines-api.logostream.dev/airports/icao/{ICAO}?key=…` |
+| `logo` | `https://airlines-api.logostream.dev/airports/icao/{ICAO}?variant=logo&key=…` |
+| `logo_white` | `https://airlines-api.logostream.dev/airports/icao/{ICAO}?variant=logo-white&key=…` |
 
-The `logo` object contains fully qualified URLs:
+The `logo` object contains fully qualified URLs including your API key. Use them directly:
 
 ```javascript
-const iconUrl = airport.logo.icon  // already a full URL
+<img src={airport.logo.icon} />
 ```
