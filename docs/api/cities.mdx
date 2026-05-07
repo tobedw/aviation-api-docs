@@ -28,17 +28,17 @@ GET /v1/cities
 <CodeGroup>
 
 ```bash By IATA code
-curl "https://aviation-api.logostream.com/v1/cities?iata=LON" \
+curl "https://aviation-api.logostream.dev/v1/cities?iata=LON" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash Search by name
-curl "https://aviation-api.logostream.com/v1/cities?name=london" \
+curl "https://aviation-api.logostream.dev/v1/cities?name=london" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash All cities in a country
-curl "https://aviation-api.logostream.com/v1/cities?country=GB" \
+curl "https://aviation-api.logostream.dev/v1/cities?country=GB" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
@@ -58,6 +58,7 @@ curl "https://aviation-api.logostream.com/v1/cities?country=GB" \
       "longitude": -0.1257,
       "timezone": "Europe/London",
       "population": 9787426,
+      "popularity_score": 98,
       "wikipedia_url": "https://en.wikipedia.org/wiki/London",
       "website": "https://www.london.gov.uk",
       "country": {
@@ -86,6 +87,7 @@ curl "https://aviation-api.logostream.com/v1/cities?country=GB" \
 | `longitude` | number | Decimal longitude |
 | `timezone` | string | IANA timezone |
 | `population` | integer | City population |
+| `popularity_score` | integer | Relative travel popularity score (0–100) |
 | `wikipedia_url` | string | Wikipedia article URL |
 | `website` | string | Official city website |
 | `country` | object | `{code2, name, continent_code}` |

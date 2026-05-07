@@ -30,27 +30,27 @@ GET /v1/airlines
 <CodeGroup>
 
 ```bash Single airline
-curl "https://aviation-api.logostream.com/v1/airlines?iata=LH" \
+curl "https://aviation-api.logostream.dev/v1/airlines?iata=LH" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash Multiple airlines
-curl "https://aviation-api.logostream.com/v1/airlines?iata=LH,BA,AF,DL,AA" \
+curl "https://aviation-api.logostream.dev/v1/airlines?iata=LH,BA,AF,DL,AA" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash Search by name
-curl "https://aviation-api.logostream.com/v1/airlines?name=Emirates" \
+curl "https://aviation-api.logostream.dev/v1/airlines?name=Emirates" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash By alliance
-curl "https://aviation-api.logostream.com/v1/airlines?alliance=star_alliance" \
+curl "https://aviation-api.logostream.dev/v1/airlines?alliance=star_alliance" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash By country
-curl "https://aviation-api.logostream.com/v1/airlines?country_code=DE" \
+curl "https://aviation-api.logostream.dev/v1/airlines?country_code=DE" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
@@ -82,9 +82,9 @@ curl "https://aviation-api.logostream.com/v1/airlines?country_code=DE" \
       "description": "The largest airline in Europe...",
       "hq_address": "Von-Gablenz-Strasse 2-6, Cologne, Germany",
       "image_url": "https://www.tripadvisor.com/img2/...",
-      "aircraft_types": [
-        { "iata": "350", "name": "Airbus A350" },
-        { "iata": "747", "name": "Boeing 747" }
+      "fleet": [
+        { "aircraft_iata": "350", "count": 25, "has_livery": true, "aircraft_types": { "iata": "350", "name": "Airbus A350" } },
+        { "aircraft_iata": "747", "count": 12, "has_livery": false, "aircraft_types": { "iata": "747", "name": "Boeing 747" } }
       ]
     }
   ],
@@ -119,4 +119,20 @@ curl "https://aviation-api.logostream.com/v1/airlines?country_code=DE" \
 | `description` | string | Airline description |
 | `hq_address` | string | Headquarters address |
 | `image_url` | string | Airline logo image URL |
-| `aircraft_types` | array | `[{iata, name}]` — fleet types |
+| `fleet` | array | `[{aircraft_iata, count, has_livery, aircraft_types: {iata, name}}]` — fleet composition |
+| `logo` | object | Logo paths for the Logo API (see below) |
+
+### Logo object
+
+| Field | Path |
+|---|---|
+| `icon` | `/airlines/icao/{ICAO}` |
+| `logo` | `/airlines/icao/{ICAO}?variant=logo` |
+| `logo_white` | `/airlines/icao/{ICAO}?variant=logo-white` |
+| `tail` | `/airlines/icao/{ICAO}?variant=tail` |
+
+The `logo` object contains fully qualified URLs — append `?key=YOUR_API_KEY` only if not already present:
+
+```javascript
+const iconUrl = airline.logo.icon  // already a full URL
+```

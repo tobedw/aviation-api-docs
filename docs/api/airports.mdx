@@ -32,22 +32,22 @@ Results are sorted by annual passenger count (busiest first) when using filters 
 <CodeGroup>
 
 ```bash Single airport
-curl "https://aviation-api.logostream.com/v1/airports?iata=LHR" \
+curl "https://aviation-api.logostream.dev/v1/airports?iata=LHR" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash Multiple airports
-curl "https://aviation-api.logostream.com/v1/airports?iata=LHR,CDG,JFK,NRT,SIN" \
+curl "https://aviation-api.logostream.dev/v1/airports?iata=LHR,CDG,JFK,NRT,SIN" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash Airports by city
-curl "https://aviation-api.logostream.com/v1/airports?city_name=London" \
+curl "https://aviation-api.logostream.dev/v1/airports?city_name=London" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash Major airports in Germany
-curl "https://aviation-api.logostream.com/v1/airports?country_code=DE&major_only=1" \
+curl "https://aviation-api.logostream.dev/v1/airports?country_code=DE&major_only=1" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
@@ -117,5 +117,21 @@ curl "https://aviation-api.logostream.com/v1/airports?country_code=DE&major_only
 | `phone` | string | Contact phone number |
 | `description` | string | Airport description |
 | `wikipedia_url` | string | Wikipedia article URL |
+| `active` | boolean | Whether the airport is currently active |
 | `city` | object | `{iata_code, city_name, latitude, longitude}` |
 | `country` | object | `{code2, name, continent_code}` |
+| `logo` | object | Logo paths for the Logo API (see below) |
+
+### Logo object
+
+| Field | Path |
+|---|---|
+| `icon` | `/airports/icao/{ICAO}` |
+| `logo` | `/airports/icao/{ICAO}?variant=logo` |
+| `logo_white` | `/airports/icao/{ICAO}?variant=logo-white` |
+
+The `logo` object contains fully qualified URLs:
+
+```javascript
+const iconUrl = airport.logo.icon  // already a full URL
+```

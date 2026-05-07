@@ -1,0 +1,90 @@
+---
+title: Airline Logos
+description: Retrieve airline logos by ICAO or IATA code with optional variant selection.
+---
+
+## Endpoints
+
+```
+GET /airlines/icao/{ICAO}
+GET /airlines/iata/{IATA}
+```
+
+When using an IATA code, the API automatically resolves it to an ICAO code via a database lookup to find the best matching asset.
+
+## Parameters
+
+| Parameter | Description | Example |
+|---|---|---|
+| `key` | Your API key | `?key=YOUR_API_KEY` |
+| `variant` | Logo variant (see below) | `?variant=tail` |
+| `format` | `svg` or `png` | `?format=png` |
+| `size` | PNG output size in pixels | `?size=400` |
+| `force` | Bypass cache (`true`) | `?force=true` |
+
+## Variants
+
+| Variant | Description |
+|---|---|
+| *(default)* | Icon logo, falls back to logo with background |
+| `icon-transparent` | Icon on transparent background |
+| `logo` | Logo with colored background |
+| `logo-transparent` | Logo on transparent background |
+| `logo-bg-white` | Logo on white background |
+| `logo-white` | White version of the logo |
+| `tail` | Tail livery |
+| `tail-3D` | 3D tail livery, falls back to flat tail |
+
+## Examples
+
+<CodeGroup>
+
+```bash By ICAO (SVG)
+https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY
+```
+
+```bash By IATA (SVG)
+https://airline-api.logostream.dev/airlines/iata/LH?key=YOUR_API_KEY
+```
+
+```bash PNG at 400px
+https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&format=png&size=400
+```
+
+```bash Tail variant
+https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&variant=tail
+```
+
+```bash White logo
+https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&variant=logo-white
+```
+
+```bash 3D tail as PNG
+https://airline-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&variant=tail-3D&format=png&size=600
+```
+
+</CodeGroup>
+
+## Response
+
+Successful responses return the image directly with appropriate content-type headers:
+
+```
+Content-Type: image/svg+xml          (SVG)
+Content-Type: image/png              (PNG)
+Cache-Control: public, max-age=31536000, immutable
+X-Cache: MISS | KV
+X-Resolved-Via: direct | iata-db
+X-Asset: DLH_icon
+X-Source: R2 | TwicPics | fallback
+```
+
+### Observability headers
+
+| Header | Description |
+|---|---|
+| `X-Cache` | `MISS` = fresh lookup, `KV` = served from cache |
+| `X-Resolved-Via` | `direct` = ICAO used as-is, `iata-db` = IATA resolved to ICAO |
+| `X-Asset` | Filename of the asset that was served |
+| `X-Source` | Asset origin: `R2`, `TwicPics`, or `fallback` |
+| `X-Fallback` | `true` if a generated placeholder was returned |

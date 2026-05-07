@@ -1,0 +1,65 @@
+---
+title: Airport Logos
+description: Retrieve airport logos by ICAO or IATA code.
+---
+
+## Endpoints
+
+```
+GET /airports/icao/{ICAO}
+GET /airports/iata/{IATA}
+```
+
+When using an IATA code, the API resolves it to an ICAO code via database lookup. Airport assets are always stored under their ICAO code.
+
+## Parameters
+
+| Parameter | Description | Example |
+|---|---|---|
+| `key` | Your API key | `?key=YOUR_API_KEY` |
+| `variant` | Logo variant (see below) | `?variant=logo` |
+| `format` | `svg` or `png` | `?format=png` |
+| `size` | PNG output size in pixels | `?size=400` |
+| `force` | Bypass cache (`true`) | `?force=true` |
+
+## Variants
+
+| Variant | Description |
+|---|---|
+| *(default)* | Icon logo, falls back to colored logo |
+| `logo` | Full colored logo |
+| `logo-white` | White version of the logo, falls back to colored logo |
+
+## Examples
+
+<CodeGroup>
+
+```bash By ICAO (SVG)
+https://airline-api.logostream.dev/airports/icao/EDDF?key=YOUR_API_KEY
+```
+
+```bash By IATA (SVG)
+https://airline-api.logostream.dev/airports/iata/FRA?key=YOUR_API_KEY
+```
+
+```bash Logo variant as PNG
+https://airline-api.logostream.dev/airports/iata/LHR?key=YOUR_API_KEY&variant=logo&format=png&size=400
+```
+
+```bash White logo
+https://airline-api.logostream.dev/airports/icao/EGLL?key=YOUR_API_KEY&variant=logo-white
+```
+
+</CodeGroup>
+
+## Response
+
+```
+Content-Type: image/svg+xml          (SVG)
+Content-Type: image/png              (PNG)
+Cache-Control: public, max-age=31536000, immutable
+X-Cache: MISS | KV
+X-Resolved-Via: direct | iata-db
+X-Asset: EDDF_icon
+X-Source: R2 | TwicPics | fallback
+```

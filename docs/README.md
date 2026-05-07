@@ -2,7 +2,7 @@
 
 REST API for aviation data including airlines, airports, cities, countries, routes, and aircraft types.
 
-**Base URL:** `https://aviation-api.logostream.com`
+**Base URL:** `https://aviation-api.logostream.dev`
 
 ---
 
@@ -102,27 +102,27 @@ GET /v1/airlines?country_code=DE&limit=100&offset=100
 
 ```bash
 # Single airline by IATA
-curl "https://aviation-api.logostream.com/v1/airlines?iata=LH" \
+curl "https://aviation-api.logostream.dev/v1/airlines?iata=LH" \
   -H "x-api-key: YOUR_API_KEY"
 
 # Multiple airlines by IATA
-curl "https://aviation-api.logostream.com/v1/airlines?iata=LH,BA,AF,DL,AA" \
+curl "https://aviation-api.logostream.dev/v1/airlines?iata=LH,BA,AF,DL,AA" \
   -H "x-api-key: YOUR_API_KEY"
 
 # Search by name
-curl "https://aviation-api.logostream.com/v1/airlines?name=Emirates" \
+curl "https://aviation-api.logostream.dev/v1/airlines?name=Emirates" \
   -H "x-api-key: YOUR_API_KEY"
 
 # All Star Alliance members
-curl "https://aviation-api.logostream.com/v1/airlines?alliance=star_alliance" \
+curl "https://aviation-api.logostream.dev/v1/airlines?alliance=star_alliance" \
   -H "x-api-key: YOUR_API_KEY"
 
 # All airlines in Germany
-curl "https://aviation-api.logostream.com/v1/airlines?country_code=DE" \
+curl "https://aviation-api.logostream.dev/v1/airlines?country_code=DE" \
   -H "x-api-key: YOUR_API_KEY"
 
 # Full database (Startup plan and above)
-curl "https://aviation-api.logostream.com/v1/airlines?limit=100&offset=0" \
+curl "https://aviation-api.logostream.dev/v1/airlines?limit=100&offset=0" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
@@ -170,19 +170,19 @@ curl "https://aviation-api.logostream.com/v1/airlines?limit=100&offset=0" \
 
 ```bash
 # Single airport by IATA
-curl "https://aviation-api.logostream.com/v1/airports?iata=LHR" \
+curl "https://aviation-api.logostream.dev/v1/airports?iata=LHR" \
   -H "x-api-key: YOUR_API_KEY"
 
 # Multiple airports
-curl "https://aviation-api.logostream.com/v1/airports?iata=LHR,CDG,JFK,NRT,SIN" \
+curl "https://aviation-api.logostream.dev/v1/airports?iata=LHR,CDG,JFK,NRT,SIN" \
   -H "x-api-key: YOUR_API_KEY"
 
 # All airports serving London
-curl "https://aviation-api.logostream.com/v1/airports?city_name=London" \
+curl "https://aviation-api.logostream.dev/v1/airports?city_name=London" \
   -H "x-api-key: YOUR_API_KEY"
 
 # Major airports in Germany
-curl "https://aviation-api.logostream.com/v1/airports?country_code=DE&major_only=1" \
+curl "https://aviation-api.logostream.dev/v1/airports?country_code=DE&major_only=1" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
@@ -227,15 +227,15 @@ curl "https://aviation-api.logostream.com/v1/airports?country_code=DE&major_only
 
 ```bash
 # City by IATA
-curl "https://aviation-api.logostream.com/v1/cities?iata=LON" \
+curl "https://aviation-api.logostream.dev/v1/cities?iata=LON" \
   -H "x-api-key: YOUR_API_KEY"
 
 # Search by name
-curl "https://aviation-api.logostream.com/v1/cities?name=london" \
+curl "https://aviation-api.logostream.dev/v1/cities?name=london" \
   -H "x-api-key: YOUR_API_KEY"
 
 # All cities in the UK
-curl "https://aviation-api.logostream.com/v1/cities?country=GB" \
+curl "https://aviation-api.logostream.dev/v1/cities?country=GB" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
@@ -273,15 +273,15 @@ Continent codes: `AF`, `AN`, `AS`, `EU`, `NA`, `OC`, `SA`
 
 ```bash
 # Single country
-curl "https://aviation-api.logostream.com/v1/countries?code=DE" \
+curl "https://aviation-api.logostream.dev/v1/countries?code=DE" \
   -H "x-api-key: YOUR_API_KEY"
 
 # All European countries
-curl "https://aviation-api.logostream.com/v1/countries?continent=EU" \
+curl "https://aviation-api.logostream.dev/v1/countries?continent=EU" \
   -H "x-api-key: YOUR_API_KEY"
 
 # Full list (252 countries, available on all plans)
-curl "https://aviation-api.logostream.com/v1/countries" \
+curl "https://aviation-api.logostream.dev/v1/countries" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
@@ -316,15 +316,15 @@ Filters can be combined, e.g. `?departureIata=FRA&arrivalIata=JFK`.
 
 ```bash
 # All routes from Frankfurt
-curl "https://aviation-api.logostream.com/v1/routes?departureIata=FRA" \
+curl "https://aviation-api.logostream.dev/v1/routes?departureIata=FRA" \
   -H "x-api-key: YOUR_API_KEY"
 
 # Specific route FRA → JFK
-curl "https://aviation-api.logostream.com/v1/routes?departureIata=FRA&arrivalIata=JFK" \
+curl "https://aviation-api.logostream.dev/v1/routes?departureIata=FRA&arrivalIata=JFK" \
   -H "x-api-key: YOUR_API_KEY"
 
 # All Lufthansa routes
-curl "https://aviation-api.logostream.com/v1/routes?airlineIata=LH" \
+curl "https://aviation-api.logostream.dev/v1/routes?airlineIata=LH" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
@@ -371,15 +371,15 @@ curl "https://aviation-api.logostream.com/v1/routes?airlineIata=LH" \
 
 ```bash
 # Single aircraft type
-curl "https://aviation-api.logostream.com/v1/aircraft-types?iata=32S" \
+curl "https://aviation-api.logostream.dev/v1/aircraft-types?iata=32S" \
   -H "x-api-key: YOUR_API_KEY"
 
 # Multiple types
-curl "https://aviation-api.logostream.com/v1/aircraft-types?iata=32S,787,350,380" \
+curl "https://aviation-api.logostream.dev/v1/aircraft-types?iata=32S,787,350,380" \
   -H "x-api-key: YOUR_API_KEY"
 
 # Full list (74 types, available on all plans)
-curl "https://aviation-api.logostream.com/v1/aircraft-types" \
+curl "https://aviation-api.logostream.dev/v1/aircraft-types" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 

@@ -1,0 +1,108 @@
+---
+title: Map
+description: Generate SVG world map images with flight routes and airport markers.
+---
+
+The Map API returns an SVG world map image — ready to embed in a web page or use as an `<img>` source.
+
+## Endpoints
+
+### Route map
+
+```
+GET /v1/map/route
+```
+
+Renders a great-circle route between two airports with airport icons.
+
+#### Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `from` | string | **Required.** Departure airport IATA code: `FRA` |
+| `to` | string | **Required.** Arrival airport IATA code: `JFK` |
+| `color_ocean` | string | Ocean background color (hex, default: `0d1b2a`) |
+| `color_land` | string | Land fill color (hex, default: `1e3a5f`) |
+| `color_route` | string | Route line color (hex, default: `f59e0b`) |
+| `color_marker` | string | Marker dot color (hex, default: `f59e0b`) |
+| `color_label` | string | Label text color (hex, default: `ffffff`) |
+| `no_icons` | integer | Set to `1` to hide airport icons and show dots only |
+
+Color values accept hex with or without the leading `#`.
+
+#### Examples
+
+<CodeGroup>
+
+```bash Route with icons
+curl "https://aviation-api.logostream.dev/v1/map/route?from=FRA&to=JFK" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Custom colors
+curl "https://aviation-api.logostream.dev/v1/map/route?from=LHR&to=SIN&color_ocean=111827&color_land=1f2937&color_route=3b82f6" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Dots only (no icons)
+curl "https://aviation-api.logostream.dev/v1/map/route?from=CDG&to=DXB&no_icons=1" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+#### HTML usage
+
+```html
+<img src="https://aviation-api.logostream.dev/v1/map/route?from=FRA&to=JFK"
+     style="width: 100%;"
+     alt="FRA → JFK route map" />
+```
+
+---
+
+### Airport map
+
+```
+GET /v1/map/airports
+```
+
+Renders up to 20 airports as markers on a world map — without a route line.
+
+#### Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `codes` | string | **Required.** Comma-separated IATA codes (max 20): `LHR,CDG,FRA` |
+| `color_ocean` | string | Ocean background color (hex, default: `0d1b2a`) |
+| `color_land` | string | Land fill color (hex, default: `1e3a5f`) |
+| `color_marker` | string | Marker dot color (hex, default: `f59e0b`) |
+| `color_label` | string | Label text color (hex, default: `ffffff`) |
+| `no_icons` | integer | Set to `1` to hide airport icons and show dots only |
+
+#### Examples
+
+<CodeGroup>
+
+```bash Multiple airports
+curl "https://aviation-api.logostream.dev/v1/map/airports?codes=LHR,CDG,FRA,AMS,MAD" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Dots only
+curl "https://aviation-api.logostream.dev/v1/map/airports?codes=JFK,LAX,ORD,DFW&no_icons=1" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+---
+
+## Response
+
+Both endpoints return an `image/svg+xml` response (not JSON). The SVG is 1000×500 px and includes a `Cache-Control: public, max-age=86400` header.
+
+```
+Content-Type: image/svg+xml
+Cache-Control: public, max-age=86400
+```

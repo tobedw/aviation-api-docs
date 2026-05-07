@@ -16,6 +16,7 @@ The full list of 74 aircraft types is available on all plans.
 | Parameter | Type | Description |
 |---|---|---|
 | `iata` | string | IATA code(s), comma-separated: `32S` or `32S,787,350` |
+| `name` | string | Fuzzy name search: `Boeing` |
 | `limit` | integer | Results per page (default: `50`) |
 | `offset` | integer | Pagination offset (default: `0`) |
 
@@ -24,17 +25,22 @@ The full list of 74 aircraft types is available on all plans.
 <CodeGroup>
 
 ```bash Single type
-curl "https://aviation-api.logostream.com/v1/aircraft-types?iata=32S" \
+curl "https://aviation-api.logostream.dev/v1/aircraft-types?iata=32S" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash Multiple types
-curl "https://aviation-api.logostream.com/v1/aircraft-types?iata=32S,787,350,380" \
+curl "https://aviation-api.logostream.dev/v1/aircraft-types?iata=32S,787,350,380" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Search by name
+curl "https://aviation-api.logostream.dev/v1/aircraft-types?name=Boeing" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash Full list
-curl "https://aviation-api.logostream.com/v1/aircraft-types" \
+curl "https://aviation-api.logostream.dev/v1/aircraft-types" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
@@ -45,11 +51,23 @@ curl "https://aviation-api.logostream.com/v1/aircraft-types" \
 ```json
 {
   "data": [
-    { "iata": "32S", "name": "Airbus A320 Family" },
-    { "iata": "787", "name": "Boeing 787 Dreamliner" },
-    { "iata": "350", "name": "Airbus A350" }
+    {
+      "iata": "787",
+      "icao": "B788",
+      "name": "Boeing 787-8 Dreamliner",
+      "manufacturer": "Boeing",
+      "category": "wide_body",
+      "first_flight": "2009-12-15",
+      "typical_seats": 242,
+      "range_km": 13530,
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Boeing_787_Dreamliner",
+      "description": "The Boeing 787 Dreamliner is a long-haul, wide-body jet airliner...",
+      "airlines": [
+        { "count": 42, "airline": { "iata": "UA", "name": "United Airlines" } }
+      ]
+    }
   ],
-  "total": 3,
+  "total": 1,
   "truncated": false,
   "page": 1,
   "limit": 50
@@ -61,7 +79,23 @@ curl "https://aviation-api.logostream.com/v1/aircraft-types" \
 | Field | Type | Description |
 |---|---|---|
 | `iata` | string | IATA aircraft type code |
+| `icao` | string | ICAO aircraft type designator |
 | `name` | string | Aircraft name |
+| `manufacturer` | string | Manufacturer name |
+| `category` | string | e.g. `wide_body`, `narrow_body`, `regional_jet` |
+| `first_flight` | date | Date of first flight |
+| `typical_seats` | integer | Typical seat count in mixed configuration |
+| `range_km` | integer | Maximum range in kilometres |
+| `wikipedia_url` | string | Wikipedia article URL |
+| `description` | string | Aircraft description |
+| `airlines` | array | Airlines operating this type |
+
+**Airline object within `airlines`:**
+
+| Field | Type | Description |
+|---|---|---|
+| `count` | integer | Number of aircraft in the fleet |
+| `airline` | object | `{iata, name}` |
 
 ## Common codes
 

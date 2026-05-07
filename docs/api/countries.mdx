@@ -28,17 +28,17 @@ The full list of 252 countries is available on all plans without requiring a fil
 <CodeGroup>
 
 ```bash Single country
-curl "https://aviation-api.logostream.com/v1/countries?code=DE" \
+curl "https://aviation-api.logostream.dev/v1/countries?code=DE" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash All European countries
-curl "https://aviation-api.logostream.com/v1/countries?continent=EU" \
+curl "https://aviation-api.logostream.dev/v1/countries?continent=EU" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
 ```bash Full list
-curl "https://aviation-api.logostream.com/v1/countries" \
+curl "https://aviation-api.logostream.dev/v1/countries" \
   -H "x-api-key: YOUR_API_KEY"
 ```
 
@@ -53,8 +53,31 @@ curl "https://aviation-api.logostream.com/v1/countries" \
       "code2": "DE",
       "code3": "DEU",
       "name": "Germany",
+      "region": "Europe",
       "continent_code": "EU",
-      "region": "Europe"
+      "subregion": "Western Europe",
+      "capital": "Berlin",
+      "capital_code": "BER",
+      "currency_code": "EUR",
+      "currency_name": "Euro",
+      "currency_symbol": "€",
+      "phone_code": "49",
+      "population": 83240000,
+      "area_km2": 357114,
+      "landlocked": false,
+      "driving_side": "right",
+      "timezone": "Europe/Berlin",
+      "tld": ".de",
+      "wikipedia_url": "https://en.wikipedia.org/wiki/Germany",
+      "capital_city": {
+        "iata_code": "BER",
+        "city_name": "Berlin",
+        "latitude": 52.5244,
+        "longitude": 13.4105
+      },
+      "flag": {
+        "url": "https://airlines-api.logostream.dev/country/DE?key=YOUR_API_KEY"
+      }
     }
   ],
   "total": 1,
@@ -71,5 +94,21 @@ curl "https://aviation-api.logostream.com/v1/countries" \
 | `code2` | string | ISO 3166-1 alpha-2 code |
 | `code3` | string | ISO 3166-1 alpha-3 code |
 | `name` | string | Country name |
-| `continent_code` | string | Continent code |
 | `region` | string | Geographic region |
+| `continent_code` | string | Continent code |
+| `subregion` | string | Geographic subregion |
+| `capital` | string | Capital city name |
+| `capital_code` | string | Capital city IATA code |
+| `currency_code` | string | ISO 4217 currency code |
+| `currency_name` | string | Currency name |
+| `currency_symbol` | string | Currency symbol |
+| `phone_code` | string | International dialing code |
+| `population` | integer | Country population |
+| `area_km2` | integer | Land area in km² |
+| `landlocked` | boolean | Whether the country is landlocked |
+| `driving_side` | string | `left` or `right` |
+| `timezone` | string | Primary IANA timezone |
+| `tld` | string | Country-code top-level domain |
+| `wikipedia_url` | string | Wikipedia article URL |
+| `capital_city` | object | `{iata_code, city_name, latitude, longitude}` |
+| `flag` | object | `{url}` — flag image URL (see Logo API) |
