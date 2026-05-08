@@ -847,6 +847,14 @@ paths:
                             arrival_iata:
                               type: string
                               example: JFK
+                            distance_km:
+                              type: integer
+                              description: Great-circle distance between departure and arrival airport (Haversine)
+                              example: 6130
+                            duration_min:
+                              type: integer
+                              description: Estimated flight duration in minutes, rounded to 5 min (distance_km / 800 km/h * 60 + 30 min overhead)
+                              example: 490
                             airlines:
                               type: array
                               items:
@@ -941,23 +949,31 @@ paths:
     get:
       summary: Route map
       description: |
-        Returns an SVG world map (1000×500 px) with a great-circle route between two airports and airport icon markers.
+        Returns an SVG world map (1000×500 px) with great-circle arc(s) between airports and animated plane icon.
+
+        **Two modes:**
+        - **Two airports:** `?from=FRA&to=JFK` — single leg, backwards compatible
+        - **Multi-leg:** `?stops=FRA,DXB,SIN,SYD` — 2–10 stops, one Bezier arc per leg
 
         The response is an `image/svg+xml` image — use directly in an `<img>` tag or embed inline.
       tags:
         - Map API
       parameters:
+        - name: stops
+          in: query
+          description: "Multi-leg route: comma-separated IATA codes in order (2–10 stops, e.g. `FRA,DXB,SIN,SYD`). Use instead of `from`/`to` for routes with more than 2 airports. One arc is drawn per leg."
+          schema:
+            type: string
+          example: FRA,DXB,SIN,SYD
         - name: from
           in: query
-          required: true
-          description: Departure airport IATA code
+          description: "Departure airport IATA code (two-airport mode). Required if `stops` is not provided."
           schema:
             type: string
           example: FRA
         - name: to
           in: query
-          required: true
-          description: Arrival airport IATA code
+          description: "Arrival airport IATA code (two-airport mode). Required if `stops` is not provided."
           schema:
             type: string
           example: JFK
