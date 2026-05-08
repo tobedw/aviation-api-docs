@@ -368,6 +368,12 @@ paths:
           schema:
             type: string
           example: DE
+        - name: lang
+          in: query
+          description: BCP 47 language code for translated `name` field (e.g. `de`, `fr`, `ja`). Defaults to `en`.
+          schema:
+            type: string
+          example: de
         - name: limit
           in: query
           schema:
@@ -463,6 +469,12 @@ paths:
           schema:
             type: integer
             enum: [0, 1]
+        - name: lang
+          in: query
+          description: BCP 47 language code for translated `name` and `description` fields. Defaults to `en`.
+          schema:
+            type: string
+          example: de
         - name: limit
           in: query
           schema:
@@ -532,6 +544,12 @@ paths:
           schema:
             type: string
           example: GB
+        - name: lang
+          in: query
+          description: BCP 47 language code for translated `city_name` and `state_full` fields. Defaults to `en`.
+          schema:
+            type: string
+          example: de
         - name: limit
           in: query
           schema:
@@ -631,6 +649,12 @@ paths:
           schema:
             type: string
             enum: [AF, AN, AS, EU, NA, OC, SA]
+        - name: lang
+          in: query
+          description: BCP 47 language code for translated country `name` field (uses CLDR data, no API cost). Defaults to `en`.
+          schema:
+            type: string
+          example: de
         - name: limit
           in: query
           schema:
@@ -967,9 +991,22 @@ paths:
           schema:
             type: integer
             enum: [0, 1]
+        - name: format
+          in: query
+          description: Response format. `svg` (default) or `png` (requires TwicPics integration).
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          description: PNG output width in pixels (only used when `format=png`). Example: `2000` for 2x resolution.
+          schema:
+            type: integer
+          example: 2000
       responses:
         '200':
-          description: SVG map image
+          description: Map image
           headers:
             Cache-Control:
               schema:
@@ -977,6 +1014,10 @@ paths:
                 example: public, max-age=86400
           content:
             image/svg+xml:
+              schema:
+                type: string
+                format: binary
+            image/png:
               schema:
                 type: string
                 format: binary
@@ -1042,9 +1083,22 @@ paths:
           schema:
             type: integer
             enum: [0, 1]
+        - name: format
+          in: query
+          description: Response format. `svg` (default) or `png` (requires TwicPics integration).
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          description: PNG output width in pixels (only used when `format=png`).
+          schema:
+            type: integer
+          example: 2000
       responses:
         '200':
-          description: SVG map image
+          description: Map image
           headers:
             Cache-Control:
               schema:
@@ -1052,6 +1106,10 @@ paths:
                 example: public, max-age=86400
           content:
             image/svg+xml:
+              schema:
+                type: string
+                format: binary
+            image/png:
               schema:
                 type: string
                 format: binary
