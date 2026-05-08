@@ -489,6 +489,25 @@ paths:
           schema:
             type: string
           example: de
+        - name: lat
+          in: query
+          description: Latitude for nearby airport search (use with `lon` and optionally `radius_km`)
+          schema:
+            type: number
+          example: 50.03
+        - name: lon
+          in: query
+          description: Longitude for nearby airport search
+          schema:
+            type: number
+          example: 8.57
+        - name: radius_km
+          in: query
+          description: Search radius in km around `lat`/`lon` (default 100 km). Results sorted by `distance_km` ascending.
+          schema:
+            type: number
+            default: 100
+          example: 50
         - name: limit
           in: query
           schema:
@@ -880,8 +899,132 @@ paths:
                                   airline_icao:
                                     type: string
                                     example: DLH
+                                  alliance:
+                                    type: string
+                                    nullable: true
+                                    example: Star Alliance
+                            co2_kg:
+                              type: integer
+                              description: "Estimated CO₂ per passenger in kg (ICAO simplified model: distance_km × 0.115)"
+                              example: 704
+                            departure_timezone:
+                              type: string
+                              description: IANA timezone of departure airport
+                              example: Europe/Berlin
+                            arrival_timezone:
+                              type: string
+                              description: IANA timezone of arrival airport
+                              example: America/New_York
+                            timezone_offset_hours:
+                              type: number
+                              description: UTC offset difference (arrival minus departure), in hours
+                              example: -6
         '400':
           description: Missing filter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/routes/connections:
+    get:
+      summary: Find 1-stop connections
+      description: |
+        Find 1-stop connecting routes between two airports.
+
+        For each intermediate hub that has direct routes from `from` and to `to`, returns both legs with full distance, duration, CO₂, and airline data. Results sorted by total distance ascending. Max 20 hubs.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: Origin airport IATA code
+          schema:
+            type: string
+          example: FRA
+        - name: to
+          in: query
+          required: true
+          description: Destination airport IATA code
+          schema:
+            type: string
+          example: LAX
+        - name: limit
+          in: query
+          description: Maximum number of connections to return (default 20)
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        hub:
+                          type: string
+                          description: Intermediate stop IATA code
+                          example: AMS
+                        leg1:
+                          type: object
+                          properties:
+                            departure_iata: { type: string, example: FRA }
+                            arrival_iata: { type: string, example: AMS }
+                            distance_km: { type: integer, example: 364 }
+                            duration_min: { type: integer, example: 57 }
+                            co2_kg: { type: integer, example: 42 }
+                            airlines:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  airline_iata: { type: string }
+                                  airline_icao: { type: string }
+                                  alliance: { type: string, nullable: true }
+                        leg2:
+                          type: object
+                          properties:
+                            departure_iata: { type: string, example: AMS }
+                            arrival_iata: { type: string, example: LAX }
+                            distance_km: { type: integer, example: 8944 }
+                            duration_min: { type: integer, example: 700 }
+                            co2_kg: { type: integer, example: 1029 }
+                            airlines:
+                              type: array
+                              items:
+                                type: object
+                                properties:
+                                  airline_iata: { type: string }
+                                  airline_icao: { type: string }
+                                  alliance: { type: string, nullable: true }
+                        total_distance_km:
+                          type: integer
+                          description: Sum of both legs
+                          example: 9308
+                        total_duration_min:
+                          type: integer
+                          description: Sum of both legs + 90 min layover
+                          example: 847
+                        total_co2_kg:
+                          type: integer
+                          description: Sum of both legs
+                          example: 1071
+        '400':
+          description: Missing from or to parameter
           content:
             application/json:
               schema:
@@ -918,6 +1061,12 @@ paths:
           schema:
             type: string
           example: de
+        - name: min_range_km
+          in: query
+          description: Filter aircraft types by minimum range in km (e.g. `10000` returns only ultra-long-haul capable types)
+          schema:
+            type: integer
+          example: 10000
         - name: limit
           in: query
           schema:
