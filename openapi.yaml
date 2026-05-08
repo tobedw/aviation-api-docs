@@ -370,7 +370,7 @@ paths:
           example: DE
         - name: lang
           in: query
-          description: BCP 47 language code for translated `name` field (e.g. `de`, `fr`, `ja`). Defaults to `en`.
+          description: BCP 47 language code for translated fields (`name`, `description`, `overview`, `key_fact`, `category`). Defaults to `en`.
           schema:
             type: string
           example: de
@@ -651,7 +651,7 @@ paths:
             enum: [AF, AN, AS, EU, NA, OC, SA]
         - name: lang
           in: query
-          description: BCP 47 language code for translated country `name` field (uses CLDR data, no API cost). Defaults to `en`.
+          description: BCP 47 language code. `name` uses CLDR data (264 languages, no API cost). `region` and `subregion` use Google Translate. Defaults to `en`.
           schema:
             type: string
           example: de
@@ -890,6 +890,12 @@ paths:
           schema:
             type: string
           example: Boeing
+        - name: lang
+          in: query
+          description: BCP 47 language code for translated `name`, `description`, and `category` fields. Defaults to `en`.
+          schema:
+            type: string
+          example: de
         - name: limit
           in: query
           schema:
