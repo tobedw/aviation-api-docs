@@ -961,6 +961,12 @@ paths:
           schema:
             type: string
           example: JFK
+        - name: style
+          in: query
+          description: "Color preset: `dark` (near-black ocean/land, orange route) or `light` (white ocean, grey land). Individual `color_*` params override the preset."
+          schema:
+            type: string
+            enum: [dark, light]
         - name: color_ocean
           in: query
           description: Ocean color (hex, with or without #)
@@ -1063,6 +1069,12 @@ paths:
           schema:
             type: string
           example: LHR,CDG,FRA,AMS,MAD
+        - name: style
+          in: query
+          description: "Color preset: `dark` or `light`. Individual `color_*` params override."
+          schema:
+            type: string
+            enum: [dark, light]
         - name: color_ocean
           in: query
           description: Ocean color (hex)
@@ -1127,6 +1139,98 @@ paths:
                 $ref: '#/components/schemas/Error'
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/map/cities:
+    get:
+      summary: City map
+      description: |
+        Returns an SVG world map (1000×500 px) with up to 20 cities plotted as dot markers with city name labels. Cities have no logo icons — markers are always simple dots.
+
+        The response is an `image/svg+xml` image — use directly in an `<img>` tag or embed inline.
+      tags:
+        - Map API
+      parameters:
+        - name: codes
+          in: query
+          required: true
+          description: Comma-separated city IATA codes (max 20, e.g. `LON,BER,NYC,TYO`)
+          schema:
+            type: string
+          example: LON,BER,NYC,TYO,DXB
+        - name: style
+          in: query
+          description: "Color preset: `dark` or `light`. Individual `color_*` params override."
+          schema:
+            type: string
+            enum: [dark, light]
+        - name: color_ocean
+          in: query
+          description: Ocean color (hex)
+          schema:
+            type: string
+        - name: color_land
+          in: query
+          description: Land fill color (hex)
+          schema:
+            type: string
+        - name: color_marker
+          in: query
+          description: Marker dot color (hex)
+          schema:
+            type: string
+        - name: color_label
+          in: query
+          description: Label text color (hex)
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Response format. `svg` (default) or `png`.
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          description: PNG output width in pixels (only used when `format=png`).
+          schema:
+            type: integer
+          example: 2000
+      responses:
+        '200':
+          description: Map image
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: public, max-age=86400
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: No cities found for the given codes
           content:
             application/json:
               schema:
