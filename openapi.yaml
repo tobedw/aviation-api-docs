@@ -92,6 +92,11 @@ components:
           example: 25
         has_livery:
           type: boolean
+          description: Whether an airline-specific livery exists for this aircraft type
+        livery_url:
+          type: string
+          description: "Livery image URL. Points to airline-specific livery when `has_livery=true`, or generic white-livery (`AAA` placeholder) when `has_livery=false`."
+          example: "https://airlines-api.logostream.dev/livery/icao/DLH?type=350&key=YOUR_KEY"
         aircraft_types:
           type: object
           properties:
@@ -305,6 +310,15 @@ components:
         description:
           type: string
           nullable: true
+        image:
+          type: object
+          nullable: true
+          description: Aircraft silhouette/livery images
+          properties:
+            white:
+              type: string
+              description: "Generic white-livery silhouette URL — uses `AAA` placeholder ICAO code. Always present."
+              example: "https://airlines-api.logostream.dev/livery/icao/AAA?type=787&key=YOUR_KEY"
         airlines:
           type: array
           items:
