@@ -1036,6 +1036,289 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /v1/routes/country-pair:
+    get:
+      summary: Routes between two countries
+      description: |
+        Returns all direct routes between airports in two countries. Useful for finding all flights connecting two markets.
+
+        Results sorted by distance ascending.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: from
+          in: query
+          required: true
+          description: Origin country ISO 2-letter code
+          schema:
+            type: string
+          example: DE
+        - name: to
+          in: query
+          required: true
+          description: Destination country ISO 2-letter code
+          schema:
+            type: string
+          example: JP
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  summary:
+                    type: object
+                    properties:
+                      direct_routes: { type: integer, example: 12 }
+                      airport_pairs: { type: integer, example: 8 }
+                      airlines_count: { type: integer, example: 5 }
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        departure_iata: { type: string, example: FRA }
+                        arrival_iata: { type: string, example: NRT }
+                        distance_km: { type: integer, example: 9330 }
+                        duration_min: { type: integer, example: 730 }
+                        co2_kg: { type: integer, example: 1073 }
+                        airlines:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              airline_iata: { type: string }
+                              airline_icao: { type: string }
+                              alliance: { type: string, nullable: true }
+        '400':
+          description: Missing from or to parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/trips/plan:
+    get:
+      summary: Multi-city trip planner
+      description: |
+        Plan a multi-city trip across 2–10 stops. For each leg, returns whether a direct route exists, operating airlines, distance, duration, CO₂, and timezone offset. Also returns trip totals.
+
+        Use cases: round-the-world planning, open-jaw itineraries, multi-station business travel.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: stops
+          in: query
+          required: true
+          description: "Comma-separated IATA airport codes in order (2–10). Append the origin again for round-trips, e.g. `FRA,DXB,SIN,SYD,FRA`."
+          schema:
+            type: string
+          example: FRA,DXB,SIN,SYD
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  legs:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        departure_iata: { type: string, example: FRA }
+                        arrival_iata: { type: string, example: DXB }
+                        is_direct: { type: boolean, description: "True if a direct route exists in the database" }
+                        distance_km: { type: integer, example: 4839 }
+                        duration_min: { type: integer, example: 393 }
+                        co2_kg: { type: integer, example: 557 }
+                        timezone_offset_hours: { type: number, example: 3 }
+                        airlines:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              airline_iata: { type: string }
+                              airline_icao: { type: string }
+                              alliance: { type: string, nullable: true }
+                  totals:
+                    type: object
+                    properties:
+                      total_distance_km: { type: integer, example: 19010 }
+                      total_duration_min: { type: integer, description: "Sum of leg durations + 90 min layover per connection", example: 1677 }
+                      total_co2_kg: { type: integer, example: 2186 }
+                      countries_visited:
+                        type: array
+                        items:
+                          type: string
+                        example: [DE, AE, SG, AU]
+        '400':
+          description: Missing or invalid stops parameter
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/stats/airport/{iata}:
+    get:
+      summary: Airport statistics
+      description: Aggregated statistics for an airport — route counts, destinations, top routes, and hub airlines.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: iata
+          in: path
+          required: true
+          description: Airport IATA code
+          schema:
+            type: string
+          example: FRA
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  iata: { type: string, example: FRA }
+                  stats:
+                    type: object
+                    properties:
+                      destinations_count: { type: integer }
+                      origins_count: { type: integer }
+                      airlines_count: { type: integer }
+                      countries_reached: { type: integer }
+                      outbound_routes: { type: integer }
+                      inbound_routes: { type: integer }
+                      longest_destination: { type: string, example: SYD }
+                      shortest_destination: { type: string, example: MUC }
+                  top_destinations:
+                    type: array
+                    description: Top 10 destinations by number of airlines
+                    items:
+                      type: object
+                      properties:
+                        iata: { type: string }
+                        airlines_count: { type: integer }
+                        distance_km: { type: integer }
+                  hub_for:
+                    type: array
+                    description: Airlines that use this airport as their base
+                    items:
+                      type: object
+                      properties:
+                        iata: { type: string }
+                        name: { type: string }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Airport not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/stats/airline/{code}:
+    get:
+      summary: Airline statistics
+      description: |
+        Aggregated statistics for an airline — route counts, top destinations, fleet, and hub airports.
+
+        Pass a 2-letter IATA code or 3-letter ICAO code. ICAO is preferred to avoid ambiguity (e.g. `LH` matches both Lufthansa and Lufthansa Cargo — use `DLH` for Lufthansa only).
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: Airline IATA (2-letter) or ICAO (3-letter) code
+          schema:
+            type: string
+          example: DLH
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  iata: { type: string, example: LH }
+                  icao: { type: string, example: DLH }
+                  name: { type: string, example: Lufthansa }
+                  stats:
+                    type: object
+                    properties:
+                      routes_count: { type: integer }
+                      destinations_count: { type: integer }
+                      origins_count: { type: integer }
+                      airports_count: { type: integer }
+                      countries_served: { type: integer }
+                      fleet_size: { type: integer }
+                      aircraft_types_count: { type: integer }
+                      longest_route:
+                        type: object
+                        properties:
+                          departure_iata: { type: string }
+                          arrival_iata: { type: string }
+                          distance_km: { type: integer }
+                  hubs:
+                    type: array
+                    description: Top 5 airports by route count
+                    items:
+                      type: object
+                      properties:
+                        iata: { type: string }
+                        routes_count: { type: integer }
+                  top_destinations:
+                    type: array
+                    description: Top 10 destinations
+                    items:
+                      type: object
+                      properties:
+                        iata: { type: string }
+                        routes_count: { type: integer }
+                  fleet:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        aircraft_iata: { type: string }
+                        count: { type: integer }
+                        range_km: { type: integer, nullable: true }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Airline not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /v1/aircraft-types:
     get:
       summary: List aircraft types
@@ -1142,10 +1425,22 @@ paths:
           example: JFK
         - name: style
           in: query
-          description: "Color preset: `dark` (near-black ocean/land, orange route) or `light` (white ocean, grey land). Individual `color_*` params override the preset."
+          description: "Color preset. `default` (deep blue, orange route), `dark` (near-black), `light` (white/grey), `minimal`, `printable`, `sepia` (warm beige/brown), `boarding-pass` (cream/black/red), `night-flight` (deep blue night). Individual `color_*` params override."
           schema:
             type: string
-            enum: [dark, light]
+            enum: [default, dark, light, minimal, printable, sepia, boarding-pass, night-flight]
+        - name: day_night
+          in: query
+          description: "Set to `1` to overlay a day/night terminator calculated from current UTC time, with a sun marker at the subsolar point. R2 cache updates every 15 min."
+          schema:
+            type: integer
+            enum: [0, 1]
+        - name: labels
+          in: query
+          description: "Marker label mode when `no_icons=1`: `iata` (IATA code), `name` (full airport name), `none` (no label)."
+          schema:
+            type: string
+            enum: [iata, name, none]
         - name: color_ocean
           in: query
           description: Ocean color (hex, with or without #)
@@ -1250,10 +1545,22 @@ paths:
           example: LHR,CDG,FRA,AMS,MAD
         - name: style
           in: query
-          description: "Color preset: `dark` or `light`. Individual `color_*` params override."
+          description: "Color preset. `default`, `dark`, `light`, `minimal`, `printable`, `sepia`, `boarding-pass`, `night-flight`. Individual `color_*` params override."
           schema:
             type: string
-            enum: [dark, light]
+            enum: [default, dark, light, minimal, printable, sepia, boarding-pass, night-flight]
+        - name: day_night
+          in: query
+          description: "Set to `1` to overlay a day/night terminator (current UTC time)."
+          schema:
+            type: integer
+            enum: [0, 1]
+        - name: labels
+          in: query
+          description: "Marker label mode when `no_icons=1`: `iata`, `name`, or `none`."
+          schema:
+            type: string
+            enum: [iata, name, none]
         - name: color_ocean
           in: query
           description: Ocean color (hex)
@@ -1342,10 +1649,22 @@ paths:
           example: LON,BER,NYC,TYO,DXB
         - name: style
           in: query
-          description: "Color preset: `dark` or `light`. Individual `color_*` params override."
+          description: "Color preset. `default`, `dark`, `light`, `minimal`, `printable`, `sepia`, `boarding-pass`, `night-flight`. Individual `color_*` params override."
           schema:
             type: string
-            enum: [dark, light]
+            enum: [default, dark, light, minimal, printable, sepia, boarding-pass, night-flight]
+        - name: day_night
+          in: query
+          description: "Set to `1` to overlay a day/night terminator (current UTC time)."
+          schema:
+            type: integer
+            enum: [0, 1]
+        - name: labels
+          in: query
+          description: "Marker label mode: `iata`, `name`, or `none`."
+          schema:
+            type: string
+            enum: [iata, name, none]
         - name: color_ocean
           in: query
           description: Ocean color (hex)
@@ -1410,6 +1729,283 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           description: No cities found for the given codes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/map/range:
+    get:
+      summary: Range ring map
+      description: |
+        Returns an SVG world map with a great-circle range ring around an airport. Use either `aircraft` (looks up `range_km` from aircraft types) or `radius_km` for a custom radius.
+      tags:
+        - Map API
+      parameters:
+        - name: airport
+          in: query
+          required: true
+          description: Center airport IATA code
+          schema:
+            type: string
+          example: FRA
+        - name: aircraft
+          in: query
+          description: Aircraft type IATA code — range ring uses the type's `range_km`
+          schema:
+            type: string
+          example: 320
+        - name: radius_km
+          in: query
+          description: Custom range ring radius in km (100–20000). Used if `aircraft` is not provided.
+          schema:
+            type: integer
+          example: 5000
+        - name: style
+          in: query
+          description: "Color preset: `default`, `dark`, `light`, `minimal`, `printable`, `sepia`, `boarding-pass`, `night-flight`."
+          schema:
+            type: string
+            enum: [default, dark, light, minimal, printable, sepia, boarding-pass, night-flight]
+        - name: day_night
+          in: query
+          schema:
+            type: integer
+            enum: [0, 1]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          schema:
+            type: integer
+          example: 2000
+      responses:
+        '200':
+          description: Map image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/map/trip:
+    get:
+      summary: Multi-city trip map
+      description: |
+        Returns an SVG world map with a multi-city route — numbered stop badges at each airport, one Bezier arc per leg. Optionally shows distance pills on each leg.
+      tags:
+        - Map API
+      parameters:
+        - name: stops
+          in: query
+          required: true
+          description: Comma-separated IATA airport codes in order (2–10 stops)
+          schema:
+            type: string
+          example: FRA,DXB,SIN,SYD
+        - name: show_distances
+          in: query
+          description: Set to `1` to show distance pills (in km) on each leg
+          schema:
+            type: integer
+            enum: [0, 1]
+        - name: style
+          in: query
+          description: "Color preset: `default`, `dark`, `light`, `minimal`, `printable`, `sepia`, `boarding-pass`, `night-flight`."
+          schema:
+            type: string
+            enum: [default, dark, light, minimal, printable, sepia, boarding-pass, night-flight]
+        - name: day_night
+          in: query
+          schema:
+            type: integer
+            enum: [0, 1]
+        - name: labels
+          in: query
+          schema:
+            type: string
+            enum: [iata, name, none]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          schema:
+            type: integer
+          example: 2000
+      responses:
+        '200':
+          description: Map image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/map/network:
+    get:
+      summary: Airline network (spider) map
+      description: |
+        Returns an SVG world map showing all routes operated by an airline as a spider network. Optionally filter by hub airport to show only routes from/to that hub.
+      tags:
+        - Map API
+      parameters:
+        - name: airline
+          in: query
+          required: true
+          description: Airline ICAO code
+          schema:
+            type: string
+          example: DLH
+        - name: hub
+          in: query
+          description: Filter to routes that include this airport IATA code as origin or destination
+          schema:
+            type: string
+          example: FRA
+        - name: style
+          in: query
+          description: "Color preset: `default`, `dark`, `light`, `minimal`, `printable`, `sepia`, `boarding-pass`, `night-flight`."
+          schema:
+            type: string
+            enum: [default, dark, light, minimal, printable, sepia, boarding-pass, night-flight]
+        - name: day_night
+          in: query
+          schema:
+            type: integer
+            enum: [0, 1]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          schema:
+            type: integer
+          example: 2000
+      responses:
+        '200':
+          description: Map image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/map/heatmap:
+    get:
+      summary: Airport traffic heatmap
+      description: |
+        Returns an SVG world map with airports rendered as heat blobs sized by annual passenger volume (logarithmic scale). Optionally filter by country.
+      tags:
+        - Map API
+      parameters:
+        - name: country
+          in: query
+          description: ISO 2-letter country code to show only airports in that country
+          schema:
+            type: string
+          example: DE
+        - name: limit
+          in: query
+          description: Maximum number of airports to include (default 300)
+          schema:
+            type: integer
+            default: 300
+          example: 300
+        - name: style
+          in: query
+          description: "Color preset: `default`, `dark`, `light`, `minimal`, `printable`, `sepia`, `boarding-pass`, `night-flight`."
+          schema:
+            type: string
+            enum: [default, dark, light, minimal, printable, sepia, boarding-pass, night-flight]
+        - name: day_night
+          in: query
+          schema:
+            type: integer
+            enum: [0, 1]
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [svg, png]
+            default: svg
+        - name: size
+          in: query
+          schema:
+            type: integer
+          example: 2000
+      responses:
+        '200':
+          description: Map image
+          content:
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
