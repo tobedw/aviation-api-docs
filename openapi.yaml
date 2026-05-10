@@ -2011,13 +2011,87 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
-  /airlines/icao/{icao}:
-    servers:
-      - url: https://airlines-api.logostream.dev
+  /v1/admin/usage:
     get:
-      summary: Airline logo by ICAO
+      summary: Usage analytics
+      description: |
+        Aggregated API usage statistics across all keys. Reads from KV (`API_KEYS_STORE`).
+
+        **Auth:** `x-admin-key` header — separate from the user `x-api-key`. Bypasses rate limiting.
       tags:
-        - Logo API
+        - Admin API
+      security: []
+      parameters:
+        - name: x-admin-key
+          in: header
+          required: true
+          description: Admin API key
+          schema:
+            type: string
+        - name: top
+          in: query
+          description: Number of top keys to return by usage (default 20, max 100)
+          schema:
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  generated_at:
+                    type: string
+                    format: date-time
+                  totals:
+                    type: object
+                    properties:
+                      keys_total: { type: integer }
+                      keys_active: { type: integer }
+                      keys_inactive: { type: integer }
+                      calls_total: { type: integer }
+                  by_plan:
+                    type: object
+                    description: Calls and key count per plan tier
+                    additionalProperties:
+                      type: object
+                      properties:
+                        keys: { type: integer }
+                        calls: { type: integer }
+                  by_endpoint:
+                    type: array
+                    description: Calls per endpoint, sorted descending
+                    items:
+                      type: object
+                      properties:
+                        endpoint: { type: string, example: airports }
+                        calls: { type: integer, example: 4500 }
+                  top_keys:
+                    type: array
+                    description: Top-N keys by total usage
+                    items:
+                      type: object
+                      properties:
+                        key_masked: { type: string, example: "FREE-02B…ED5B" }
+                        plan: { type: string }
+                        active: { type: boolean }
+                        usage: { type: integer }
+                        limit: { type: integer }
+                        customer_id: { type: string }
+                        top_endpoints:
+                          type: array
+                          items:
+                            type: array
+        '401':
+          description: Unauthorized (missing or invalid x-admin-key)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /airlines/icao/{icao}:
       parameters:
         - name: icao
           in: path
