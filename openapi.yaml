@@ -138,6 +138,9 @@ components:
     Airline:
       type: object
       properties:
+        id:
+          type: integer
+          example: 1042
         iata:
           type: string
           example: LH
@@ -149,27 +152,47 @@ components:
           example: Lufthansa
         marketing_name:
           type: string
+          nullable: true
           example: Lufthansa
+        legal_name:
+          type: string
+          nullable: true
+          example: Deutsche Lufthansa AG
+        three_digit_code:
+          type: string
+          nullable: true
+          description: 3-digit IATA AWB prefix (e.g. "020" for Lufthansa)
+          example: "020"
         country_code:
           type: string
           example: DE
+        home_region:
+          type: string
+          nullable: true
+          example: Europe
         alliance:
           type: string
           example: star_alliance
           nullable: true
+        airline_group:
+          type: string
+          nullable: true
+          example: Lufthansa Group
+        related_brand:
+          type: string
+          nullable: true
+          example: Austrian Airlines
         type:
           type: string
           example: Full service carrier
-        colors:
-          type: string
-          example: "#05164d"
-          nullable: true
-        color2:
+        category:
           type: string
           nullable: true
-        text_color:
-          type: string
+          example: Passenger
+        lcc:
+          type: boolean
           nullable: true
+          description: True if classified as a low-cost carrier
         is_lowcost:
           type: boolean
         is_oneworld:
@@ -178,6 +201,43 @@ components:
           type: boolean
         is_skyteam:
           type: boolean
+        active:
+          type: boolean
+          nullable: true
+        defunct:
+          type: boolean
+          nullable: true
+        defunct_reason:
+          type: string
+          nullable: true
+        year_founded:
+          type: integer
+          nullable: true
+          example: 1953
+        base_airport_iata:
+          type: string
+          nullable: true
+          example: FRA
+        base_city_iata:
+          type: string
+          nullable: true
+          example: FRA
+        colors:
+          type: string
+          example: "#05164d"
+          nullable: true
+        color2:
+          type: string
+          nullable: true
+        color3:
+          type: string
+          nullable: true
+        color4:
+          type: string
+          nullable: true
+        text_color:
+          type: string
+          nullable: true
         rating_tripadvisor:
           type: number
           nullable: true
@@ -188,14 +248,32 @@ components:
         website:
           type: string
           nullable: true
+        phone:
+          type: string
+          nullable: true
         description:
           type: string
           nullable: true
+        overview:
+          type: string
+          nullable: true
+          description: Longer editorial overview (translatable via `?lang=`)
+        key_fact:
+          type: string
+          nullable: true
+          description: Short notable fact about the airline (translatable via `?lang=`)
         hq_address:
+          type: string
+          nullable: true
+        wikipedia_url:
           type: string
           nullable: true
         image_url:
           type: string
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
           nullable: true
         fleet:
           type: array
@@ -208,6 +286,9 @@ components:
     Airport:
       type: object
       properties:
+        id:
+          type: integer
+          example: 3051
         iata:
           type: string
           example: LHR
@@ -619,6 +700,9 @@ paths:
                         items:
                           type: object
                           properties:
+                            id:
+                              type: integer
+                              example: 4201
                             iata_code:
                               type: string
                               example: LON
