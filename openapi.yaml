@@ -1269,7 +1269,7 @@ paths:
         - name: iata
           in: path
           required: true
-          description: Airport IATA code
+          description: "Airport IATA code (3 letters, e.g. `FRA`) or ICAO code (4 letters, e.g. `EDDF`)"
           schema:
             type: string
           example: FRA
