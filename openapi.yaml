@@ -1486,7 +1486,7 @@ paths:
             default: svg
         - name: size
           in: query
-          description: PNG output width in pixels (only used when `format=png`). Example: `2000` for 2x resolution.
+          description: "PNG output width in pixels (only used when `format=png`). Example: `2000` for 2x resolution."
           schema:
             type: integer
           example: 2000
