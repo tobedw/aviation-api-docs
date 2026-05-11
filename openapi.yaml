@@ -12,6 +12,7 @@ info:
     |-----|----------|---------|
     | **Aviation Data API** | `aviation-api.logostream.dev` | Structured data — airlines, airports, cities, countries, routes, maps |
     | **Logo API** | `airlines-api.logostream.dev` | Airline logos, airport logos, country flags (image responses) |
+    | **Livery API** | `airlines-api.logostream.dev` | High-resolution aircraft livery images by airline ICAO/IATA or AWB number (PNG only) |
 
     Both APIs authenticate via the `x-api-key` header.
 
@@ -2235,3 +2236,163 @@ paths:
               schema:
                 type: string
                 format: binary
+
+  /livery/icao/{code}:
+    servers:
+      - url: https://airlines-api.logostream.dev
+    get:
+      summary: Aircraft livery by airline ICAO
+      tags:
+        - Livery API
+      description: |
+        Returns a high-resolution PNG of the aircraft painted in the airline's livery.
+        Available from the **Startup plan** and above.
+
+        Max native resolution: **2752 × 1536 px**.
+        Only PNG is supported — no SVG available for liveries.
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: ICAO airline code (2–3 letters)
+          schema:
+            type: string
+          example: DLH
+        - name: type
+          in: query
+          required: true
+          description: "Aircraft type code, e.g. `319`, `787`, `330`, `73H`, `CR9`, `E90`"
+          schema:
+            type: string
+          example: "319"
+        - name: key
+          in: query
+          required: true
+          description: Your API key
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: "Output width in pixels. Max: 2752. Examples: 600, 1600, 2752."
+          schema:
+            type: integer
+            maximum: 2752
+          example: 1600
+      responses:
+        '200':
+          description: Aircraft livery PNG image
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Invalid or missing API key
+        '403':
+          description: Plan does not include livery access
+
+  /livery/iata/{code}:
+    servers:
+      - url: https://airlines-api.logostream.dev
+    get:
+      summary: Aircraft livery by airline IATA
+      tags:
+        - Livery API
+      description: |
+        Same as `/livery/icao/{code}` but accepts a 2-letter IATA airline code.
+        The code is resolved to ICAO internally via the airline database.
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: IATA airline code (2 letters)
+          schema:
+            type: string
+          example: LH
+        - name: type
+          in: query
+          required: true
+          description: "Aircraft type code, e.g. `319`, `787`, `330`"
+          schema:
+            type: string
+          example: "319"
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: "Output width in pixels. Max: 2752."
+          schema:
+            type: integer
+            maximum: 2752
+          example: 1600
+      responses:
+        '200':
+          description: Aircraft livery PNG image
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Invalid or missing API key
+        '403':
+          description: Plan does not include livery access
+
+  /livery/awb/{id}:
+    servers:
+      - url: https://airlines-api.logostream.dev
+    get:
+      summary: Aircraft livery by AWB number or prefix
+      tags:
+        - Livery API
+      description: |
+        Look up an aircraft livery by Air Waybill (AWB) number.
+        Accepts either:
+        - A **3-digit IATA AWB prefix** (e.g. `020` for Lufthansa, `057` for Air France)
+        - A **full AWB number** (e.g. `020-12345678`) — the prefix is extracted automatically
+
+        The prefix is resolved to the airline's ICAO code, then the livery is rendered.
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: "3-digit AWB prefix (e.g. `020`) or full AWB number (e.g. `020-12345678`)"
+          schema:
+            type: string
+          example: "020"
+        - name: type
+          in: query
+          required: true
+          description: "Aircraft type code, e.g. `B763`, `319`, `787`"
+          schema:
+            type: string
+          example: B763
+        - name: key
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: size
+          in: query
+          description: "Output width in pixels. Max: 2752."
+          schema:
+            type: integer
+            maximum: 2752
+          example: 1600
+      responses:
+        '200':
+          description: Aircraft livery PNG image
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '401':
+          description: Invalid or missing API key
+        '403':
+          description: Plan does not include livery access
+        '404':
+          description: AWB prefix not found / airline unknown
