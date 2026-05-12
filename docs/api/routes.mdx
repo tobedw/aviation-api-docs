@@ -64,13 +64,35 @@ curl "https://aviation-api.logostream.dev/v1/routes?arrivalIata=LHR" \
 {
   "data": [
     {
-      "id": 12345,
+      "id": 128569,
       "departure_iata": "FRA",
       "arrival_iata": "JFK",
       "airlines": [
-        { "airline_iata": "LH", "airline_icao": "DLH" },
-        { "airline_iata": "UA", "airline_icao": "UAL" }
-      ]
+        {
+          "airline_iata": "LH",
+          "airline_icao": "DLH",
+          "alliance": "star_alliance",
+          "weekdays": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+        },
+        {
+          "airline_iata": "LH",
+          "airline_icao": "GEC",
+          "alliance": null,
+          "weekdays": []
+        },
+        {
+          "airline_iata": "DL",
+          "airline_icao": "DAL",
+          "alliance": "skyteam",
+          "weekdays": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+        }
+      ],
+      "departure_timezone": "Europe/Berlin",
+      "arrival_timezone": "America/New_York",
+      "timezone_offset_hours": -6,
+      "distance_km": 6189,
+      "duration_min": 495,
+      "co2_kg": 910
     }
   ],
   "total": 1,
@@ -87,7 +109,13 @@ curl "https://aviation-api.logostream.dev/v1/routes?arrivalIata=LHR" \
 | `id` | integer | Route ID |
 | `departure_iata` | string | Departure airport IATA |
 | `arrival_iata` | string | Arrival airport IATA |
-| `airlines` | array | Airlines operating this route |
+| `departure_timezone` | string \| null | IANA timezone of the departure airport (e.g. `Europe/Berlin`) |
+| `arrival_timezone` | string \| null | IANA timezone of the arrival airport |
+| `timezone_offset_hours` | number \| null | Hours added by crossing timezones (`arrival_offset − departure_offset`). Negative when flying west |
+| `distance_km` | integer \| null | Great-circle distance between airports |
+| `duration_min` | integer \| null | Estimated flight time in minutes (haversine-based) |
+| `co2_kg` | integer \| null | Estimated CO₂ emissions per economy passenger |
+| `airlines` | array | Airlines operating this route (see below) |
 
 **Airline object within `airlines`:**
 
@@ -95,3 +123,5 @@ curl "https://aviation-api.logostream.dev/v1/routes?arrivalIata=LHR" \
 |---|---|---|
 | `airline_iata` | string | Airline IATA code |
 | `airline_icao` | string | Airline ICAO code |
+| `alliance` | string \| null | Normalized alliance key: `star_alliance`, `oneworld`, `skyteam`, or other regional alliance (e.g. `value_alliance`). `null` if the airline is not in any alliance. Disambiguated by `(IATA, ICAO)` so e.g. `LH/DLH` (Lufthansa) and `LH/GEC` (Lufthansa Cargo) resolve correctly |
+| `weekdays` | string[] | Days of the week the airline operates this route. Any subset of `["mon","tue","wed","thu","fri","sat","sun"]`. Empty array if no schedule data is available (typical for cargo carriers) |
