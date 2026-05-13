@@ -35,6 +35,7 @@
         "api/aircraft-types",
         "api/nearby",
         "api/suggest",
+        "api/timezones",
         "api/map"
       ]
     },

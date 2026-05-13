@@ -1,0 +1,111 @@
+---
+title: Timezones
+description: Reference list of IANA timezones used by airports, with country code and standard / DST offsets.
+---
+
+## Why use it
+
+The single source of truth for time math in your aviation app.
+
+<CardGroup cols={2}>
+  <Card title="Real IANA Names" icon="globe">
+    Every timezone is a proper IANA identifier (`Europe/Berlin`, `America/New_York`) — drop straight into `moment-timezone`, `luxon`, or `Intl.DateTimeFormat`.
+  </Card>
+  <Card title="Standard + DST Offsets" icon="clock">
+    Returns both the standard (`gmt`) and daylight-saving (`dst`) offsets in hours. If a timezone has no DST, both values are equal.
+  </Card>
+  <Card title="Country-Indexed" icon="flag">
+    Each entry includes the ISO country code, so you can group or filter by country.
+  </Card>
+  <Card title="Airport-Backed" icon="plane">
+    Only timezones actually used by active airports are returned — no clutter from unused zones.
+  </Card>
+</CardGroup>
+
+## Endpoint
+
+```
+GET /v1/timezones
+```
+
+<Note>
+  Available on all plans, including Community.
+</Note>
+
+## Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `country_code` | string | ISO 3166 alpha-2 country code to filter by, e.g. `DE`. |
+
+## Examples
+
+<CodeGroup>
+
+```bash All timezones
+curl "https://aviation-api.logostream.dev/v1/timezones" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Germany only
+curl "https://aviation-api.logostream.dev/v1/timezones?country_code=DE" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "count": 101,
+  "data": [
+    {
+      "timezone": "Africa/Abidjan",
+      "country_code": "CI",
+      "gmt": 0,
+      "dst": 0
+    },
+    {
+      "timezone": "Europe/Berlin",
+      "country_code": "DE",
+      "gmt": 1,
+      "dst": 2
+    },
+    {
+      "timezone": "America/New_York",
+      "country_code": "US",
+      "gmt": -5,
+      "dst": -4
+    },
+    {
+      "timezone": "Asia/Tokyo",
+      "country_code": "JP",
+      "gmt": 9,
+      "dst": 9
+    }
+  ]
+}
+```
+
+## Response fields
+
+| Field | Type | Description |
+|---|---|---|
+| `count` | integer | Number of (timezone, country_code) pairs returned. |
+| `data` | array | List of timezone entries (see below). |
+
+### Entry object
+
+| Field | Type | Description |
+|---|---|---|
+| `timezone` | string | IANA timezone identifier, e.g. `Europe/Berlin`. |
+| `country_code` | string | ISO 3166 alpha-2 country code. |
+| `gmt` | number | Standard offset from UTC in hours (winter). |
+| `dst` | number | DST offset from UTC in hours (summer). Equals `gmt` if the zone has no DST. |
+
+## Notes
+
+- The list is derived from the `timezone` column of all **active** airports. A timezone that's used by multiple countries (e.g. `Europe/Zurich` in CH, FR, DE) appears once per country.
+- Offsets are computed using `Intl.DateTimeFormat` against mid-January (standard) and mid-July (DST), so the values reflect the current year's rules.
+- Results are sorted alphabetically by `timezone`.

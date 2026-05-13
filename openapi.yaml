@@ -1826,6 +1826,77 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /v1/timezones:
+    get:
+      summary: Reference list of IANA timezones
+      description: |
+        Returns the IANA timezones used by active airports together with their
+        country code, standard offset (winter), and DST offset (summer).
+
+        Useful for time-zone pickers, scheduling UIs, and translating between
+        user local time and airport local time.
+
+        Available on all plans, including Community.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: country_code
+          in: query
+          description: ISO 3166 alpha-2 country code filter, e.g. `DE`.
+          schema:
+            type: string
+            minLength: 2
+            maxLength: 2
+          example: DE
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        timezone:
+                          type: string
+                          example: Europe/Berlin
+                        country_code:
+                          type: string
+                          example: DE
+                          nullable: true
+                        gmt:
+                          type: number
+                          description: Standard offset from UTC in hours (winter).
+                          example: 1
+                          nullable: true
+                        dst:
+                          type: number
+                          description: DST offset from UTC in hours (summer). Equals `gmt` when the zone has no DST.
+                          example: 2
+                          nullable: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /v1/map/route:
     get:
       summary: Route map
