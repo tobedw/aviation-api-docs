@@ -423,6 +423,66 @@ components:
           type: string
           example: Unauthorized — provide a valid x-api-key header
 
+    SuggestCity:
+      type: object
+      properties:
+        city_code:
+          type: string
+          example: MAD
+        name:
+          type: string
+          example: Madrid
+        lat:
+          type: number
+          nullable: true
+        lng:
+          type: number
+          nullable: true
+        timezone:
+          type: string
+          nullable: true
+        population:
+          type: integer
+          nullable: true
+        popularity:
+          type: integer
+          nullable: true
+          description: Travel popularity score.
+        country_code:
+          type: string
+          nullable: true
+
+    SuggestAirport:
+      type: object
+      properties:
+        iata_code:
+          type: string
+          nullable: true
+        icao_code:
+          type: string
+          nullable: true
+        name:
+          type: string
+        lat:
+          type: number
+          nullable: true
+        lng:
+          type: number
+          nullable: true
+        timezone:
+          type: string
+          nullable: true
+        city_code:
+          type: string
+          nullable: true
+        country_code:
+          type: string
+          nullable: true
+        type:
+          type: string
+          nullable: true
+          example: large_airport
+
 paths:
   /v1/airlines:
     get:
@@ -1646,6 +1706,121 @@ paths:
                 $ref: '#/components/schemas/Error'
         '401':
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/suggest:
+    get:
+      summary: Smart autocomplete (countries, cities, airports)
+      description: |
+        Fuzzy multi-bucket autocomplete across countries, cities, and airports,
+        plus derived cross-references (cities of matched airports, top airports
+        in matched countries, etc.).
+
+        Designed for destination pickers and search UIs that need rich,
+        cross-referenced suggestions in a single call.
+
+        Requires the **Startup plan** or higher. Not available on Community.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: q
+          in: query
+          required: true
+          description: Search query (minimum 2 characters). Matches names plus IATA/ICAO codes (exact).
+          schema:
+            type: string
+            minLength: 2
+          example: spain
+        - name: limit
+          in: query
+          description: Maximum results per bucket.
+          schema:
+            type: integer
+            default: 10
+            maximum: 25
+          example: 10
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: object
+                    properties:
+                      q:
+                        type: string
+                      limit:
+                        type: integer
+                  countries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        code:
+                          type: string
+                          example: ES
+                        code3:
+                          type: string
+                          example: ESP
+                        name:
+                          type: string
+                        continent:
+                          type: string
+                          example: EU
+                  cities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SuggestCity'
+                  airports:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SuggestAirport'
+                  cities_by_airports:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SuggestCity'
+                  cities_by_countries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SuggestCity'
+                  airports_by_cities:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SuggestAirport'
+                  airports_by_countries:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SuggestAirport'
+        '400':
+          description: Bad Request (missing or too-short `q`)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Endpoint not available on the current plan
           content:
             application/json:
               schema:

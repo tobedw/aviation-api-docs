@@ -1,0 +1,138 @@
+---
+title: Suggest
+description: Smart autocomplete across countries, cities, and airports with derived cross-references.
+---
+
+## Why use it
+
+Power destination search with one call.
+
+<CardGroup cols={2}>
+  <Card title="One Query, Seven Buckets" icon="layer-group">
+    Direct matches plus derived suggestions (airports in matched countries, cities of matched airports, etc.) — perfect for autocomplete dropdowns.
+  </Card>
+  <Card title="Popularity-Ranked" icon="arrow-up-wide-short">
+    Cities and airports are ordered by popularity, so the most relevant suggestions surface first.
+  </Card>
+  <Card title="IATA/ICAO Aware" icon="hashtag">
+    Exact-match shortcuts for codes (`LON`, `KJFK`) plus fuzzy `ILIKE` on names — works for both typed codes and typed-out names.
+  </Card>
+  <Card title="Cross-Referenced Results" icon="diagram-project">
+    Match a country → get its top cities + airports. Match an airport → get its city. Build rich destination pickers without extra requests.
+  </Card>
+</CardGroup>
+
+## Endpoint
+
+```
+GET /v1/suggest
+```
+
+<Note>
+  Available on **Startup plan and above**. Not included in Community.
+</Note>
+
+## Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `q` | string | **Required.** Search query, min 2 characters. |
+| `limit` | integer | Max results per bucket. Default: `10`, max: `25`. |
+
+## Examples
+
+<CodeGroup>
+
+```bash Search Spain
+curl "https://aviation-api.logostream.dev/v1/suggest?q=spain" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Search by IATA city code
+curl "https://aviation-api.logostream.dev/v1/suggest?q=LON&limit=5" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "query": { "q": "spain", "limit": 10 },
+  "countries": [
+    { "code": "ES", "code3": "ESP", "name": "Spain", "continent": "EU" }
+  ],
+  "cities": [
+    {
+      "city_code": "POS",
+      "name": "Port of Spain",
+      "lat": 10.66668,
+      "lng": -61.51889,
+      "timezone": "America/Port_of_Spain",
+      "population": 49000,
+      "popularity": 15490,
+      "country_code": "TT"
+    }
+  ],
+  "airports": [],
+  "cities_by_airports": [],
+  "cities_by_countries": [
+    {
+      "city_code": "MAD",
+      "name": "Madrid",
+      "lat": 40.4165,
+      "lng": -3.70256,
+      "timezone": "Europe/Madrid",
+      "population": 3266126,
+      "popularity": 92,
+      "country_code": "ES"
+    }
+  ],
+  "airports_by_cities": [
+    {
+      "iata_code": "POS",
+      "icao_code": "TTPP",
+      "name": "Piarco International",
+      "lat": 10.59762,
+      "lng": -61.337951,
+      "timezone": "America/Port_of_Spain",
+      "city_code": "POS",
+      "country_code": "TT",
+      "type": "large_airport"
+    }
+  ],
+  "airports_by_countries": [
+    {
+      "iata_code": "MAD",
+      "icao_code": "LEMD",
+      "name": "Adolfo Suárez Madrid–Barajas",
+      "lat": 40.484669,
+      "lng": -3.565533,
+      "timezone": "Europe/Madrid",
+      "city_code": "MAD",
+      "country_code": "ES",
+      "type": "large_airport"
+    }
+  ]
+}
+```
+
+## Response buckets
+
+| Bucket | Source |
+|---|---|
+| `countries` | Matches on country name, ISO alpha-2 code, or ISO alpha-3 code. |
+| `cities` | Matches on city name or IATA city code. Sorted by popularity. |
+| `airports` | Matches on airport name, IATA, or ICAO code. Active airports only. |
+| `cities_by_airports` | Cities linked to the airports in `airports[]`. |
+| `cities_by_countries` | Top popular cities in the countries from `countries[]`. |
+| `airports_by_cities` | Active airports linked to the cities in `cities[]`. |
+| `airports_by_countries` | Only large/commercial airports in the countries from `countries[]`. |
+
+## Notes
+
+- Search is case-insensitive (Postgres `ILIKE`).
+- IATA/ICAO codes match **exactly** (uppercased), name search is **contains**.
+- Each bucket is independently limited by `limit` (default `10`, max `25`).
+- Derived buckets (`*_by_*`) are only populated when their seed bucket has matches.

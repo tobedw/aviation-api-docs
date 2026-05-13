@@ -34,6 +34,7 @@
         "api/routes",
         "api/aircraft-types",
         "api/nearby",
+        "api/suggest",
         "api/map"
       ]
     },
