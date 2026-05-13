@@ -1476,6 +1476,181 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
 
+  /v1/nearby:
+    get:
+      summary: Nearby airports and cities
+      description: |
+        Returns the airports and cities closest to a given latitude/longitude,
+        sorted by great-circle distance. Useful for "closest airport" lookups,
+        location-aware autocomplete, and smart-assistant integrations.
+
+        Available on all plans, including Community.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          description: Latitude in decimal degrees.
+          schema:
+            type: number
+            minimum: -90
+            maximum: 90
+          example: -6.1744
+        - name: lng
+          in: query
+          required: true
+          description: Longitude in decimal degrees. Alias `lon` is also accepted.
+          schema:
+            type: number
+            minimum: -180
+            maximum: 180
+          example: 106.8294
+        - name: distance
+          in: query
+          description: Search radius in km. Default `50`, max `500`. Alias `radius_km`.
+          schema:
+            type: number
+            default: 50
+            maximum: 500
+          example: 20
+        - name: types
+          in: query
+          description: Comma-separated list of result types. Use to skip cities or airports.
+          schema:
+            type: string
+            default: airports,cities
+            enum:
+              - airports
+              - cities
+              - airports,cities
+          example: airports,cities
+        - name: major_only
+          in: query
+          description: When `1`, returns only `large_airport` types (skips small airports, heliports, air bases).
+          schema:
+            type: integer
+            enum: [0, 1]
+            default: 0
+        - name: limit
+          in: query
+          description: Maximum results per category.
+          schema:
+            type: integer
+            default: 100
+            maximum: 100
+      responses:
+        '200':
+          description: OK
+          headers:
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+            X-RateLimit-Reset:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  query:
+                    type: object
+                    properties:
+                      lat:
+                        type: number
+                      lng:
+                        type: number
+                      distance_km:
+                        type: number
+                      types:
+                        type: array
+                        items:
+                          type: string
+                  counts:
+                    type: object
+                    properties:
+                      airports:
+                        type: integer
+                      cities:
+                        type: integer
+                  airports:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        iata_code:
+                          type: string
+                        icao_code:
+                          type: string
+                        name:
+                          type: string
+                        type:
+                          type: string
+                          example: large_airport
+                        lat:
+                          type: number
+                        lng:
+                          type: number
+                        timezone:
+                          type: string
+                        city:
+                          type: string
+                          nullable: true
+                        city_code:
+                          type: string
+                          nullable: true
+                        country_code:
+                          type: string
+                        country_name:
+                          type: string
+                        distance:
+                          type: integer
+                          description: Great-circle distance from query point in km.
+                  cities:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        iata_code:
+                          type: string
+                        name:
+                          type: string
+                        lat:
+                          type: number
+                        lng:
+                          type: number
+                        timezone:
+                          type: string
+                        population:
+                          type: integer
+                          nullable: true
+                        popularity_score:
+                          type: integer
+                          nullable: true
+                        country_code:
+                          type: string
+                        country_name:
+                          type: string
+                        distance:
+                          type: integer
+                          description: Great-circle distance from query point in km.
+        '400':
+          description: Bad Request (missing/invalid lat or lng)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
   /v1/map/route:
     get:
       summary: Route map
