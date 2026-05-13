@@ -235,7 +235,16 @@ components:
         color4:
           type: string
           nullable: true
+        color5:
+          type: string
+          nullable: true
+        color6:
+          type: string
+          nullable: true
         text_color:
+          type: string
+          nullable: true
+        text_color2:
           type: string
           nullable: true
         rating_tripadvisor:
@@ -254,6 +263,10 @@ components:
         description:
           type: string
           nullable: true
+        long_description:
+          type: string
+          nullable: true
+          description: Extended editorial description with operational details
         overview:
           type: string
           nullable: true
@@ -266,6 +279,24 @@ components:
           type: string
           nullable: true
         wikipedia_url:
+          type: string
+          nullable: true
+        instagram_url:
+          type: string
+          nullable: true
+        twitter_url:
+          type: string
+          nullable: true
+        facebook_url:
+          type: string
+          nullable: true
+        youtube_url:
+          type: string
+          nullable: true
+        linkedin_url:
+          type: string
+          nullable: true
+        tiktok_url:
           type: string
           nullable: true
         image_url:

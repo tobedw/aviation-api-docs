@@ -108,7 +108,12 @@ curl "https://aviation-api.logostream.dev/v1/airlines?country_code=DE" \
 | `type` | string | Carrier type |
 | `colors` | string | Primary brand color (hex) |
 | `color2` | string | Secondary brand color (hex) |
+| `color3` | string | Tertiary brand color (hex) |
+| `color4` | string | Quaternary brand color (hex) |
+| `color5` | string | Fifth brand color (hex) |
+| `color6` | string | Sixth brand color (hex) |
 | `text_color` | string | Text color on brand background (hex) |
+| `text_color2` | string | Secondary text color (hex) |
 | `is_lowcost` | boolean | Low-cost carrier flag |
 | `is_oneworld` | boolean | oneworld member |
 | `is_staralliance` | boolean | Star Alliance member |
@@ -116,9 +121,16 @@ curl "https://aviation-api.logostream.dev/v1/airlines?country_code=DE" \
 | `rating_tripadvisor` | number | TripAdvisor rating (1–5) |
 | `rating_skytrax_stars` | number | Skytrax star rating |
 | `website` | string | Official website URL |
-| `description` | string | Airline description |
+| `description` | string | Short airline description |
+| `long_description` | string | Extended editorial description with operational details |
 | `hq_address` | string | Headquarters address |
 | `image_url` | string | Airline logo image URL |
+| `instagram_url` | string | Instagram profile URL |
+| `twitter_url` | string | Twitter / X profile URL |
+| `facebook_url` | string | Facebook page URL |
+| `youtube_url` | string | YouTube channel URL |
+| `linkedin_url` | string | LinkedIn company URL |
+| `tiktok_url` | string | TikTok profile URL |
 | `fleet` | array | `[{aircraft_iata, count, has_livery, aircraft_types: {iata, name}}]` — fleet composition |
 | `logo` | object | Logo paths for the Logo API (see below) |
 
