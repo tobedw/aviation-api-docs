@@ -33,6 +33,7 @@
         "api/countries",
         "api/routes",
         "api/aircraft-types",
+        "api/nearby",
         "api/map"
       ]
     },

@@ -1,0 +1,174 @@
+---
+title: Nearby
+description: Find the nearest airports and cities for any latitude/longitude.
+---
+
+## Why use it
+
+Turn a GPS coordinate into the airports and cities your user actually cares about.
+
+<CardGroup cols={2}>
+  <Card title="One Call, Two Datasets" icon="layer-group">
+    Returns nearby airports **and** cities in a single response — sorted by real great-circle distance.
+  </Card>
+  <Card title="Built for Smart Assistants" icon="wand-magic-sparkles">
+    “Closest airport to my hotel?”, “What city is near these coordinates?” — answer location questions instantly.
+  </Card>
+  <Card title="Accurate Haversine Distance" icon="ruler">
+    Real geodesic distance in km — no rough bounding-box approximations in the result.
+  </Card>
+  <Card title="Filter by Major Hubs" icon="plane-departure">
+    Add `major_only=1` to skip airstrips and air bases — only large commercial airports.
+  </Card>
+</CardGroup>
+
+## Endpoint
+
+```
+GET /v1/nearby
+```
+
+## Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `lat` | number | **Required.** Latitude in decimal degrees, e.g. `50.05` |
+| `lng` | number | **Required.** Longitude in decimal degrees, e.g. `8.57`. Alias: `lon`. |
+| `distance` | number | Search radius in km. Default: `50`, max: `500`. Alias: `radius_km`. |
+| `types` | string | Comma-separated: `airports`, `cities`, or `airports,cities`. Default: both. |
+| `major_only` | `0`/`1` | When `1`, returns only `large_airport` types (skips small/medium airports and air bases). |
+| `limit` | integer | Max results per category. Default & max: `100`. |
+
+<Note>
+  Available on all plans, including Community.
+</Note>
+
+## Examples
+
+<CodeGroup>
+
+```bash Around Jakarta (20 km)
+curl "https://aviation-api.logostream.dev/v1/nearby?lat=-6.1744&lng=106.8294&distance=20" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Major airports near Frankfurt (100 km)
+curl "https://aviation-api.logostream.dev/v1/nearby?lat=50.05&lng=8.57&distance=100&types=airports&major_only=1" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Cities only
+curl "https://aviation-api.logostream.dev/v1/nearby?lat=51.5085&lng=-0.1257&distance=50&types=cities" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "query": {
+    "lat": -6.1744,
+    "lng": 106.8294,
+    "distance_km": 20,
+    "types": ["airports", "cities"]
+  },
+  "counts": {
+    "airports": 3,
+    "cities": 2
+  },
+  "airports": [
+    {
+      "iata_code": "HLP",
+      "icao_code": "WIHH",
+      "name": "Halim Perdanakusuma International",
+      "type": "large_airport",
+      "lat": -6.26661,
+      "lng": 106.890999,
+      "timezone": "Asia/Jakarta",
+      "city": "Jakarta",
+      "city_code": "JKT",
+      "country_code": "ID",
+      "country_name": "Indonesia",
+      "distance": 12
+    },
+    {
+      "iata_code": "CGK",
+      "icao_code": "WIII",
+      "name": "Soekarno-Hatta International",
+      "type": "large_airport",
+      "lat": -6.12557,
+      "lng": 106.655998,
+      "timezone": "Asia/Jakarta",
+      "city": "Jakarta",
+      "city_code": "JKT",
+      "country_code": "ID",
+      "country_name": "Indonesia",
+      "distance": 20
+    }
+  ],
+  "cities": [
+    {
+      "iata_code": "JKT",
+      "name": "Jakarta",
+      "lat": -6.21462,
+      "lng": 106.84513,
+      "timezone": "Asia/Jakarta",
+      "population": 10770487,
+      "popularity_score": 87,
+      "country_code": "ID",
+      "country_name": "Indonesia",
+      "distance": 5
+    }
+  ]
+}
+```
+
+## Response fields
+
+### Top level
+
+| Field | Type | Description |
+|---|---|---|
+| `query` | object | Echoes the resolved query: `lat`, `lng`, `distance_km`, `types` |
+| `counts` | object | `{ airports, cities }` — number of results returned per category |
+| `airports` | array | Only present when `types` includes `airports` |
+| `cities` | array | Only present when `types` includes `cities` |
+
+### Airport object
+
+| Field | Type | Description |
+|---|---|---|
+| `iata_code` | string | IATA airport code |
+| `icao_code` | string | ICAO airport code |
+| `name` | string | Airport name |
+| `type` | string | `large_airport`, `medium_airport`, `small_airport`, `heliport`, ... |
+| `lat` / `lng` | number | Coordinates |
+| `timezone` | string | IANA timezone |
+| `city` | string \| null | City name (from linked city record) |
+| `city_code` | string \| null | City IATA code |
+| `country_code` | string | ISO 3166 alpha-2 |
+| `country_name` | string | Country name |
+| `distance` | integer | Distance from query point in km (great-circle, rounded) |
+
+### City object
+
+| Field | Type | Description |
+|---|---|---|
+| `iata_code` | string | City IATA code |
+| `name` | string | City name |
+| `lat` / `lng` | number | Coordinates |
+| `timezone` | string | IANA timezone |
+| `population` | integer \| null | City population |
+| `popularity_score` | integer \| null | Travel popularity score (0–100) |
+| `country_code` | string | ISO 3166 alpha-2 |
+| `country_name` | string | Country name |
+| `distance` | integer | Distance from query point in km (great-circle, rounded) |
+
+## Notes
+
+- Only **active** airports are returned (closed airports are excluded).
+- Results are sorted by ascending distance.
+- The maximum search radius is **500 km**. Larger values are clamped.
+- Bounding-box pre-filtering on the database means responses stay fast even at the maximum radius.
