@@ -1,0 +1,102 @@
+---
+title: Hubs
+description: Curated airline hub and focus-city assignments — the single source of truth for hub data across the API.
+---
+
+## Endpoint
+
+```
+GET /v1/hubs
+```
+
+The `airline_hubs` table is a hand-curated mapping between airlines and the airports they operate as hubs or focus cities. Every hub field exposed elsewhere in the API (on `/v1/airlines`, `/v1/airports`, `/v1/stats/...`) is sourced from this table — so the data is consistent across endpoints.
+
+## Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `airline` | string | Airline IATA code (e.g. `LH`, `AA`). |
+| `airline_icao` | string | Airline ICAO code. Use alone, or with `airline` to disambiguate carriers that share an IATA. |
+| `airport` | string | Airport IATA code (e.g. `FRA`, `JFK`). |
+| `type` | string | `hub` or `focus_city`. |
+| `limit` | integer | Results per page (default `50`, max `100`). |
+| `offset` | integer | Pagination offset. |
+
+<Note>
+  Some IATA codes belong to multiple airlines (e.g. `CA` = Air China + Air China Cargo). Pass `airline_icao` to disambiguate, otherwise the most prominent passenger carrier is returned.
+</Note>
+
+## Examples
+
+<CodeGroup>
+
+```bash All Lufthansa hubs
+curl "https://aviation-api.logostream.dev/v1/hubs?airline=LH" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Everyone hubbed at JFK
+curl "https://aviation-api.logostream.dev/v1/hubs?airport=JFK" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Air China Cargo (disambiguated)
+curl "https://aviation-api.logostream.dev/v1/hubs?airline=CA&airline_icao=CAO" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Only focus cities for American
+curl "https://aviation-api.logostream.dev/v1/hubs?airline=AA&type=focus_city" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## Response
+
+```json
+{
+  "data": [
+    {
+      "type": "hub",
+      "notes": "Primary hub",
+      "airline": {
+        "id": 96123,
+        "iata": "LH",
+        "icao": "DLH",
+        "name": "Lufthansa",
+        "alliance": "star_alliance",
+        "country_code": "DE"
+      },
+      "airport": {
+        "iata": "FRA",
+        "icao": "EDDF",
+        "name": "Frankfurt am Main",
+        "country_code": "DE",
+        "city_iata_code": "FRA",
+        "latitude": 50.0264,
+        "longitude": 8.5431
+      }
+    }
+  ],
+  "total": 2,
+  "truncated": false,
+  "page": 1,
+  "limit": 50
+}
+```
+
+## Response fields
+
+| Field | Type | Description |
+|---|---|---|
+| `type` | string | `hub` or `focus_city`. |
+| `notes` | string | Free-text note (e.g. `Primary hub`, `Secondary hub`). May be `null`. |
+| `airline` | object | `{id, iata, icao, name, alliance, country_code}` |
+| `airport` | object | `{iata, icao, name, country_code, city_iata_code, latitude, longitude}` |
+
+## Related endpoints
+
+- `/v1/airlines` — same `hubs[]` + `focus_cities[]` arrays, embedded on each airline.
+- `/v1/airports` — `hubs[]` array from the airport side.
+- `/v1/stats/airport/{iata}` and `/v1/stats/airline/{code}` — split into `hubs` (curated) and `top_airports` / `top_destinations` (route-derived).

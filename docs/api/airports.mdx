@@ -70,7 +70,22 @@ curl "https://aviation-api.logostream.dev/v1/airports?country_code=DE&major_only
       "passengers": 79200000,
       "aircraft_movements": 472296,
       "cargo_tonnes": 1734019,
-      "hub_for": "British Airways, Virgin Atlantic",
+      "hubs": [
+        {
+          "airline_iata": "BA",
+          "airline_icao": "BAW",
+          "airline_name": "British Airways",
+          "type": "hub",
+          "notes": "Primary hub"
+        },
+        {
+          "airline_iata": "VS",
+          "airline_icao": "VIR",
+          "airline_name": "Virgin Atlantic",
+          "type": "hub",
+          "notes": null
+        }
+      ],
       "terminals": "5",
       "website": "https://www.heathrow.com",
       "phone": "+44 844 335 1801",
@@ -112,7 +127,7 @@ curl "https://aviation-api.logostream.dev/v1/airports?country_code=DE&major_only
 | `passengers` | integer | Annual passenger count |
 | `aircraft_movements` | integer | Annual aircraft movements |
 | `cargo_tonnes` | integer | Annual cargo volume in tonnes |
-| `hub_for` | string | Airlines using this airport as a hub |
+| `hubs` | array | Airlines using this airport as a hub or focus city. Each entry: `{airline_iata, airline_icao, airline_name, type, notes}` where `type` is `hub` or `focus_city`. Sourced from the curated [airline_hubs](/docs/api/hubs) table. |
 | `terminals` | string | Terminal count or names |
 | `website` | string | Official airport website |
 | `phone` | string | Contact phone number |

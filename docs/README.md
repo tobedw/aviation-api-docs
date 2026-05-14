@@ -201,7 +201,7 @@ curl "https://aviation-api.logostream.dev/v1/airports?country_code=DE&major_only
 | `passengers` | integer | Annual passenger count |
 | `aircraft_movements` | integer | Annual aircraft movements |
 | `cargo_tonnes` | integer | Annual cargo in tonnes |
-| `hub_for` | string | Airlines using this as a hub |
+| `hubs` | array | Airlines using this airport as a hub or focus city — see `/v1/hubs` |
 | `terminals` | string | Terminal information |
 | `website` | string | Official website URL |
 | `phone` | string | Contact phone number |

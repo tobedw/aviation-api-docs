@@ -108,6 +108,70 @@ components:
               type: string
               example: Airbus A350
 
+    HubEntry:
+      type: object
+      description: Curated hub or focus-city assignment between an airline and an airport.
+      properties:
+        airport_iata:
+          type: string
+          example: FRA
+        notes:
+          type: string
+          nullable: true
+          example: Primary hub
+
+    AirportHubEntry:
+      type: object
+      description: Hub/focus-city entry as seen from the airport side.
+      properties:
+        airline_iata:
+          type: string
+          nullable: true
+          example: LH
+        airline_icao:
+          type: string
+          nullable: true
+          example: DLH
+        airline_name:
+          type: string
+          example: Lufthansa
+        type:
+          type: string
+          enum: [hub, focus_city]
+        notes:
+          type: string
+          nullable: true
+
+    HubListEntry:
+      type: object
+      description: Flat hub entry returned by /v1/hubs.
+      properties:
+        type:
+          type: string
+          enum: [hub, focus_city]
+        notes:
+          type: string
+          nullable: true
+        airline:
+          type: object
+          properties:
+            id: { type: integer }
+            iata: { type: string, nullable: true }
+            icao: { type: string, nullable: true }
+            name: { type: string }
+            alliance: { type: string, nullable: true }
+            country_code: { type: string, nullable: true }
+        airport:
+          type: object
+          properties:
+            iata: { type: string }
+            icao: { type: string, nullable: true }
+            name: { type: string, nullable: true }
+            country_code: { type: string, nullable: true }
+            city_iata_code: { type: string, nullable: true }
+            latitude: { type: number, nullable: true }
+            longitude: { type: number, nullable: true }
+
     City:
       type: object
       properties:
@@ -214,14 +278,20 @@ components:
           type: integer
           nullable: true
           example: 1953
-        base_airport_iata:
-          type: string
-          nullable: true
-          example: FRA
         base_city_iata:
           type: string
           nullable: true
           example: FRA
+        hubs:
+          type: array
+          description: Curated primary/secondary hub airports for this airline.
+          items:
+            $ref: '#/components/schemas/HubEntry'
+        focus_cities:
+          type: array
+          description: Curated focus cities for this airline.
+          items:
+            $ref: '#/components/schemas/HubEntry'
         colors:
           type: string
           example: "#05164d"
@@ -353,9 +423,11 @@ components:
         cargo_tonnes:
           type: integer
           nullable: true
-        hub_for:
-          type: string
-          nullable: true
+        hubs:
+          type: array
+          description: Airlines that use this airport as a hub or focus city (from curated airline_hubs table).
+          items:
+            $ref: '#/components/schemas/AirportHubEntry'
         terminals:
           type: string
           nullable: true
@@ -1393,14 +1465,28 @@ paths:
                         iata: { type: string }
                         airlines_count: { type: integer }
                         distance_km: { type: integer }
-                  hub_for:
+                  hubs:
                     type: array
-                    description: Airlines that use this airport as their base
+                    description: Airlines that use this airport as a hub (from curated airline_hubs table).
                     items:
                       type: object
                       properties:
-                        iata: { type: string }
+                        iata: { type: string, nullable: true }
+                        icao: { type: string, nullable: true }
                         name: { type: string }
+                        alliance: { type: string, nullable: true }
+                        notes: { type: string, nullable: true }
+                  focus_cities:
+                    type: array
+                    description: Airlines that use this airport as a focus city.
+                    items:
+                      type: object
+                      properties:
+                        iata: { type: string, nullable: true }
+                        icao: { type: string, nullable: true }
+                        name: { type: string }
+                        alliance: { type: string, nullable: true }
+                        notes: { type: string, nullable: true }
         '401':
           description: Unauthorized
           content:
@@ -1460,11 +1546,33 @@ paths:
                           distance_km: { type: integer }
                   hubs:
                     type: array
-                    description: Top 5 airports by route count
+                    description: Curated primary/secondary hub airports for this airline.
                     items:
                       type: object
                       properties:
                         iata: { type: string }
+                        name: { type: string }
+                        country_code: { type: string, nullable: true }
+                        notes: { type: string, nullable: true }
+                  focus_cities:
+                    type: array
+                    description: Curated focus cities for this airline.
+                    items:
+                      type: object
+                      properties:
+                        iata: { type: string }
+                        name: { type: string }
+                        country_code: { type: string, nullable: true }
+                        notes: { type: string, nullable: true }
+                  top_airports:
+                    type: array
+                    description: Top airports by route count (computed from routes data, not curated).
+                    items:
+                      type: object
+                      properties:
+                        iata: { type: string }
+                        name: { type: string }
+                        country_code: { type: string, nullable: true }
                         routes_count: { type: integer }
                   top_destinations:
                     type: array
@@ -1490,6 +1598,74 @@ paths:
                 $ref: '#/components/schemas/Error'
         '404':
           description: Airline not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /v1/hubs:
+    get:
+      summary: List airline hubs and focus cities
+      description: |
+        Curated list of hub and focus-city assignments between airlines and airports.
+
+        Sourced from the `airline_hubs` table, the single source of truth for hub data across the API. Filter by airline (IATA), airport (IATA), or assignment type. When an IATA code is ambiguous (e.g. `CA` matches both Air China and Air China Cargo), pass `airline_icao` as a disambiguator.
+      tags:
+        - Aviation Data API
+      parameters:
+        - name: airline
+          in: query
+          description: Airline IATA code (e.g. `LH`, `AA`).
+          schema:
+            type: string
+          example: LH
+        - name: airline_icao
+          in: query
+          description: Airline ICAO code. Use alone, or with `airline` to disambiguate carriers sharing an IATA.
+          schema:
+            type: string
+          example: DLH
+        - name: airport
+          in: query
+          description: Airport IATA code (e.g. `FRA`, `JFK`).
+          schema:
+            type: string
+          example: FRA
+        - name: type
+          in: query
+          description: Filter by assignment type.
+          schema:
+            type: string
+            enum: [hub, focus_city]
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HubListEntry'
+                  total: { type: integer }
+                  truncated: { type: boolean }
+                  page: { type: integer }
+                  limit: { type: integer }
+        '401':
+          description: Unauthorized
           content:
             application/json:
               schema:
