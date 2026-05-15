@@ -1,6 +1,6 @@
 ---
 title: Airlines
-description: Retrieve airline profiles including colors, alliances, ratings, and fleet data.
+description: Retrieve airline profiles including colors, alliances, ratings, hubs, and editorial content.
 ---
 
 ## Endpoint
@@ -82,10 +82,6 @@ curl "https://aviation-api.logostream.dev/v1/airlines?country_code=DE" \
       "description": "The largest airline in Europe...",
       "hq_address": "Von-Gablenz-Strasse 2-6, Cologne, Germany",
       "image_url": "https://www.tripadvisor.com/img2/...",
-      "fleet": [
-        { "aircraft_iata": "350", "count": 25, "has_livery": true, "aircraft_types": { "iata": "350", "name": "Airbus A350" } },
-        { "aircraft_iata": "747", "count": 12, "has_livery": false, "aircraft_types": { "iata": "747", "name": "Boeing 747" } }
-      ],
       "hubs": [
         { "airport_iata": "FRA", "notes": "Primary hub" },
         { "airport_iata": "MUC", "notes": "Secondary hub" }
@@ -136,7 +132,6 @@ curl "https://aviation-api.logostream.dev/v1/airlines?country_code=DE" \
 | `youtube_url` | string | YouTube channel URL |
 | `linkedin_url` | string | LinkedIn company URL |
 | `tiktok_url` | string | TikTok profile URL |
-| `fleet` | array | `[{aircraft_iata, count, has_livery, aircraft_types: {iata, name}}]` — fleet composition |
 | `hubs` | array | Curated primary/secondary hub airports. Each entry: `{airport_iata, notes}`. Sourced from the curated [airline_hubs](/docs/api/hubs) table. |
 | `focus_cities` | array | Curated focus cities. Same shape as `hubs`. |
 | `logo` | object | Logo paths for the Logo API (see below) |

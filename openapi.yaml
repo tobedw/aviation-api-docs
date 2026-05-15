@@ -82,31 +82,7 @@ components:
           type: string
           example: https://airlines-api.logostream.dev/airports/icao/EDDF?variant=logo-white&key=YOUR_API_KEY
 
-    FleetEntry:
-      type: object
-      properties:
-        aircraft_iata:
-          type: string
-          example: 350
-        count:
-          type: integer
-          example: 25
-        has_livery:
-          type: boolean
-          description: Whether an airline-specific livery exists for this aircraft type
-        livery_url:
-          type: string
-          description: "Livery image URL. Points to airline-specific livery when `has_livery=true`, or generic white-livery (`AAA` placeholder) when `has_livery=false`."
-          example: "https://airlines-api.logostream.dev/livery/icao/DLH?type=350&key=YOUR_KEY"
-        aircraft_types:
-          type: object
-          properties:
-            iata:
-              type: string
-              example: 350
-            name:
-              type: string
-              example: Airbus A350
+    Airline:
 
     HubEntry:
       type: object
@@ -376,10 +352,6 @@ components:
           type: string
           format: date-time
           nullable: true
-        fleet:
-          type: array
-          items:
-            $ref: '#/components/schemas/FleetEntry'
         logo:
           $ref: '#/components/schemas/AirlineLogo'
           nullable: true
@@ -591,7 +563,7 @@ paths:
     get:
       summary: List airlines
       description: |
-        Retrieve airline profiles including colors, alliances, ratings, and fleet data.
+        Retrieve airline profiles including colors, alliances, ratings, hubs, and editorial content.
 
         **Community plan:** At least one filter required. Max 50 results per page.
       tags:
