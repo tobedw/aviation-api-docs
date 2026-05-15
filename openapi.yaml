@@ -345,9 +345,6 @@ components:
         tiktok_url:
           type: string
           nullable: true
-        image_url:
-          type: string
-          nullable: true
         created_at:
           type: string
           format: date-time
