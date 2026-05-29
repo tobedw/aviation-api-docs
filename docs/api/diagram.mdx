@@ -1,0 +1,345 @@
+---
+title: Airport Diagram
+description: Runway geometry and GeoJSON map features for 10,000+ airports worldwide.
+---
+
+The Diagram API provides structured airport layout data — runway dimensions, surface types, threshold coordinates, and full GeoJSON map features (terminals, taxiways, aprons, gates) sourced from OurAirports and OpenStreetMap.
+
+**Coverage:** 10,741 airports with runway data. 5,800+ airports with full GeoJSON map features.
+
+## Endpoints
+
+### Single airport diagram
+
+```
+GET /v1/airport-diagram/{icao}
+```
+
+Returns the full diagram for one airport including runway data and GeoJSON map features.
+
+#### Path parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `icao` | string | **Required.** ICAO 4-letter airport code: `EDDF` |
+
+#### Examples
+
+<CodeGroup>
+
+```bash Full diagram
+curl "https://aviation-api.logostream.dev/v1/airport-diagram/EDDF" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash GeoJSON only
+curl "https://aviation-api.logostream.dev/v1/airport-diagram/EDDF/geojson" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Runways only
+curl "https://aviation-api.logostream.dev/v1/airport-diagram/EDDF/runways" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+#### Response
+
+```json
+{
+  "icao": "EDDF",
+  "iata": "FRA",
+  "coverage": "full_detail",
+  "runway_count": 4,
+  "runways": [
+    {
+      "designator": "07L/25R",
+      "length_ft": 13123,
+      "length_m": 3999,
+      "width_ft": 197,
+      "width_m": 60,
+      "surface": "ASP",
+      "lighted": true,
+      "closed": false,
+      "threshold_low": { "lat": 50.0264, "lon": 8.5345 },
+      "threshold_high": { "lat": 50.0361, "lon": 8.6234 }
+    }
+  ],
+  "geojson": {
+    "type": "FeatureCollection",
+    "features": [...]
+  },
+  "meta": {
+    "source": "osm",
+    "osm_fetched_at": "2024-11-15T08:00:00Z",
+    "manually_updated_at": null
+  }
+}
+```
+
+---
+
+### GeoJSON sub-endpoint
+
+```
+GET /v1/airport-diagram/{icao}/geojson
+```
+
+Returns only the raw GeoJSON `FeatureCollection` for the airport. Returns `404` if no GeoJSON data exists for the airport (runway-only coverage).
+
+---
+
+### Runways sub-endpoint
+
+```
+GET /v1/airport-diagram/{icao}/runways
+```
+
+Returns only runway data without GeoJSON. Useful for apps that need dimensions and surface type without the full map payload.
+
+```json
+{
+  "icao": "EDDF",
+  "iata": "FRA",
+  "runway_count": 4,
+  "runways": [...]
+}
+```
+
+---
+
+### Bulk diagram
+
+```
+GET /v1/airport-diagram
+```
+
+Returns diagram data for multiple airports at once. GeoJSON is omitted from bulk responses — fetch `/v1/airport-diagram/{icao}` individually for map features.
+
+<Note>
+  Bulk access requires a Starter plan or above. Community plan keys receive a 403.
+</Note>
+
+#### Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `icao` | string | Comma-separated ICAO codes (max 50): `EDDF,EGLL,KJFK` |
+| `country_code` | string | ISO 2-letter country code to fetch all airports in a country: `DE` |
+
+Exactly one of `icao` or `country_code` must be provided.
+
+**Plan limits:**
+- Starter: up to 50 airports per request, up to 100 results for country queries
+- Growth / Enterprise: up to 500 results
+
+#### Examples
+
+<CodeGroup>
+
+```bash Multiple ICAOs
+curl "https://aviation-api.logostream.dev/v1/airport-diagram?icao=EDDF,EGLL,KJFK,RJTT" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash All airports in Germany
+curl "https://aviation-api.logostream.dev/v1/airport-diagram?country_code=DE" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+#### Response
+
+```json
+{
+  "data": [
+    {
+      "icao": "EDDF",
+      "iata": "FRA",
+      "coverage": "full_detail",
+      "runway_count": 4,
+      "runways": [...],
+      "meta": {
+        "source": "osm",
+        "osm_fetched_at": "2024-11-15T08:00:00Z",
+        "manually_updated_at": null
+      }
+    },
+    {
+      "icao": "EGLL",
+      "iata": "LHR",
+      "coverage": "full_detail",
+      "runway_count": 2,
+      "runways": [...],
+      "meta": {
+        "source": "osm",
+        "osm_fetched_at": "2024-10-22T10:30:00Z",
+        "manually_updated_at": null
+      }
+    }
+  ],
+  "total": 2,
+  "truncated": false
+}
+```
+
+---
+
+## Response fields
+
+### Top-level fields
+
+| Field | Type | Description |
+|---|---|---|
+| `icao` | string | ICAO 4-letter code |
+| `iata` | string \| null | IATA 3-letter code if available |
+| `coverage` | string | Coverage level — see table below |
+| `runway_count` | integer | Number of runways in the dataset |
+| `runways` | array | Runway objects (see below) |
+| `geojson` | object \| null | GeoJSON `FeatureCollection` (single-airport endpoint only) |
+| `meta` | object | Data source and freshness info |
+
+### Coverage levels
+
+| Value | Meaning |
+|---|---|
+| `full_detail` | GeoJSON present with more than 5 map features (terminals, taxiways, gates, etc.) |
+| `partial` | GeoJSON present but sparse (≤ 5 features, typically runways/aprons only) |
+| `runway_only` | No GeoJSON available; only runway data from OurAirports |
+
+### Runway fields
+
+| Field | Type | Description |
+|---|---|---|
+| `designator` | string | Runway designator, e.g. `07L/25R` |
+| `length_ft` | integer | Length in feet |
+| `length_m` | integer | Length in metres |
+| `width_ft` | integer | Width in feet |
+| `width_m` | integer | Width in metres |
+| `surface` | string | Surface code: `ASP` (asphalt), `CON` (concrete), `GRS` (grass), `GRV` (gravel), `WAT` (water), etc. |
+| `lighted` | boolean | Whether runway has lighting |
+| `closed` | boolean | Whether runway is currently closed |
+| `threshold_low` | object \| null | `{ lat, lon }` for the lower-numbered threshold |
+| `threshold_high` | object \| null | `{ lat, lon }` for the higher-numbered threshold |
+
+### GeoJSON feature types
+
+The `geojson` field is a standard GeoJSON `FeatureCollection`. Each feature has a `properties.type` value:
+
+| Feature type | Description |
+|---|---|
+| `runway` | Runway polygon or centerline |
+| `taxiway` | Taxiway path |
+| `apron` | Apron / ramp area |
+| `terminal` | Terminal building footprint |
+| `gate` | Individual gate position |
+| `hangar` | Hangar building |
+| `control_tower` | Control tower |
+| `parking` | Aircraft parking stand |
+| `helipad` | Helipad surface |
+| `aeroway` | Generic aeroway element |
+
+### Meta fields
+
+| Field | Type | Description |
+|---|---|---|
+| `source` | string | `osm` for OpenStreetMap data, `ourairports` for OurAirports-only |
+| `osm_fetched_at` | string \| null | ISO 8601 timestamp of last OSM data pull |
+| `manually_updated_at` | string \| null | ISO 8601 timestamp of last manual correction |
+
+---
+
+## Plan tiers
+
+| Plan | Single lookup | Bulk (ICAO list) | Bulk (country) | Max results |
+|---|---|---|---|---|
+| Community | No | No | No | — |
+| Starter | Yes | Yes (max 50) | Yes | 100 |
+| Growth | Yes | Yes (max 50) | Yes | 500 |
+| Enterprise | Yes | Yes (max 50) | Yes | 500 |
+
+---
+
+## Code examples
+
+<CodeGroup>
+
+```javascript JavaScript
+const res = await fetch('https://aviation-api.logostream.dev/v1/airport-diagram/EDDF', {
+  headers: { 'x-api-key': 'YOUR_API_KEY' },
+});
+const diagram = await res.json();
+
+console.log(diagram.icao);          // "EDDF"
+console.log(diagram.coverage);      // "full_detail"
+console.log(diagram.runway_count);  // 4
+
+// Use GeoJSON directly with e.g. Mapbox GL or Leaflet
+map.addSource('airport', { type: 'geojson', data: diagram.geojson });
+```
+
+```javascript Bulk fetch by country (JavaScript)
+const res = await fetch(
+  'https://aviation-api.logostream.dev/v1/airport-diagram?country_code=DE',
+  { headers: { 'x-api-key': 'YOUR_API_KEY' } }
+);
+const { data, total, truncated } = await res.json();
+
+console.log(`Got ${total} airports, truncated: ${truncated}`);
+for (const airport of data) {
+  console.log(`${airport.icao} — ${airport.runway_count} runways (${airport.coverage})`);
+}
+```
+
+```python Python
+import requests
+
+# Single airport
+r = requests.get(
+    'https://aviation-api.logostream.dev/v1/airport-diagram/KJFK',
+    headers={'x-api-key': 'YOUR_API_KEY'},
+)
+diagram = r.json()
+print(diagram['icao'], diagram['coverage'], diagram['runway_count'])
+
+# Fetch GeoJSON for use with geopandas or shapely
+import geopandas as gpd
+r2 = requests.get(
+    'https://aviation-api.logostream.dev/v1/airport-diagram/KJFK/geojson',
+    headers={'x-api-key': 'YOUR_API_KEY'},
+)
+gdf = gpd.GeoDataFrame.from_features(r2.json()['features'])
+print(gdf.head())
+```
+
+```python Bulk fetch by ICAO list (Python)
+import requests
+
+icaos = ['EDDF', 'EGLL', 'KJFK', 'RJTT', 'YSSY']
+r = requests.get(
+    'https://aviation-api.logostream.dev/v1/airport-diagram',
+    params={'icao': ','.join(icaos)},
+    headers={'x-api-key': 'YOUR_API_KEY'},
+)
+result = r.json()
+for airport in result['data']:
+    print(f"{airport['icao']} ({airport['iata']}) — {airport['coverage']}")
+```
+
+</CodeGroup>
+
+---
+
+## Use cases
+
+**Flight simulators and add-on tools** — pull accurate runway lengths, widths, surface types, and threshold coordinates to generate airport scenery or validate add-on data.
+
+**ATC training platforms** — render airport ground diagrams from GeoJSON for controller familiarisation tools. The full-detail tier includes taxiways, stands, and terminal footprints.
+
+**Aviation apps and EFBs** — display airport layout diagrams in electronic flight bags. Combine with the [Airports endpoint](/docs/api/airports) for full airport profiles.
+
+**Data pipelines and analytics** — use country-bulk queries to build runway surface distribution tables, coverage maps, or dataset quality reports across entire countries.
+
+**Academic and research** — OurAirports runway data combined with OSM geometries gives you open, machine-readable airport geometry for GIS analysis.
