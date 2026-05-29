@@ -3075,3 +3075,206 @@ paths:
           description: Plan does not include livery access
         '404':
           description: AWB prefix not found / airline unknown
+  /v1/airport-diagram/{icao}:
+    get:
+      tags:
+        - Airport Diagrams
+      summary: Airport diagram by ICAO
+      description: |
+        Returns runway geometry and optional GeoJSON for a single airport identified by ICAO code.
+
+        **Coverage levels:**
+        - `full_detail` — runways + full GeoJSON (taxiways, terminals, aprons)
+        - `partial` — runways + limited GeoJSON
+        - `runway_only` — runways only, `geojson` is `null`
+      operationId: getAirportDiagram
+      parameters:
+        - name: icao
+          in: path
+          required: true
+          schema:
+            type: string
+          example: EGLL
+      responses:
+        '200':
+          description: Airport diagram
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  icao:
+                    type: string
+                    example: EGLL
+                  iata:
+                    type: string
+                    nullable: true
+                    example: LHR
+                  coverage:
+                    type: string
+                    enum: [full_detail, partial, runway_only]
+                    example: full_detail
+                  runway_count:
+                    type: integer
+                    example: 2
+                  runways:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        designator:
+                          type: string
+                          example: 09L/27R
+                        length_ft:
+                          type: integer
+                          example: 12001
+                        length_m:
+                          type: integer
+                          example: 3658
+                        width_ft:
+                          type: integer
+                          example: 164
+                        width_m:
+                          type: integer
+                          example: 50
+                        surface:
+                          type: string
+                          nullable: true
+                          example: asphalt
+                        lighted:
+                          type: boolean
+                          example: true
+                        closed:
+                          type: boolean
+                          example: false
+                        threshold_low:
+                          type: object
+                          properties:
+                            lat: { type: number, example: 51.47749 }
+                            lng: { type: number, example: -0.489439 }
+                            designator: { type: string, example: 09L }
+                            elevation_ft: { type: integer, example: 79 }
+                        threshold_high:
+                          type: object
+                          properties:
+                            lat: { type: number, example: 51.477681 }
+                            lng: { type: number, example: -0.433227 }
+                            designator: { type: string, example: 27R }
+                            elevation_ft: { type: integer, example: 78 }
+                  geojson:
+                    type: object
+                    nullable: true
+                    description: GeoJSON FeatureCollection. `null` when coverage is `runway_only`.
+                  meta:
+                    type: object
+                    properties:
+                      source:
+                        type: string
+                        example: osm
+                      osm_fetched_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+                      manually_updated_at:
+                        type: string
+                        format: date-time
+                        nullable: true
+        '404':
+          description: Airport not found
+
+  /v1/airport-diagram/{icao}/runways:
+    get:
+      tags:
+        - Airport Diagrams
+      summary: Runway array only
+      description: Returns only the runway array for an airport — no GeoJSON.
+      operationId: getAirportRunways
+      parameters:
+        - name: icao
+          in: path
+          required: true
+          schema:
+            type: string
+          example: EGLL
+      responses:
+        '200':
+          description: Runway list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  icao:
+                    type: string
+                  runway_count:
+                    type: integer
+                  runways:
+                    type: array
+                    items:
+                      type: object
+        '404':
+          description: Airport not found
+
+  /v1/airport-diagram/{icao}/geojson:
+    get:
+      tags:
+        - Airport Diagrams
+      summary: Raw GeoJSON only
+      description: Returns raw GeoJSON FeatureCollection for the airport. Returns 404 if coverage is `runway_only`.
+      operationId: getAirportGeoJSON
+      parameters:
+        - name: icao
+          in: path
+          required: true
+          schema:
+            type: string
+          example: EGLL
+      responses:
+        '200':
+          description: GeoJSON FeatureCollection
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Airport not found or no GeoJSON available
+
+  /v1/airport-diagram:
+    get:
+      tags:
+        - Airport Diagrams
+      summary: Bulk airport diagrams
+      description: |
+        Returns diagrams for multiple airports. GeoJSON is omitted from bulk responses.
+
+        At least one filter is required: `icao` (comma-separated) or `country_code`.
+      operationId: getAirportDiagramBulk
+      parameters:
+        - name: icao
+          in: query
+          description: Comma-separated ICAO codes
+          schema:
+            type: string
+          example: EGLL,EDDF,LFPG
+        - name: country_code
+          in: query
+          description: ISO 3166-1 alpha-2 country code
+          schema:
+            type: string
+          example: DE
+      responses:
+        '200':
+          description: Array of airport diagrams (no geojson field)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                  total:
+                    type: integer
+        '400':
+          description: No filter provided
