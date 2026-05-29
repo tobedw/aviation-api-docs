@@ -29,6 +29,7 @@
         "data/rate-limits",
         "api/airlines",
         "api/airports",
+        "api/diagram",
         "api/hubs",
         "api/cities",
         "api/countries",

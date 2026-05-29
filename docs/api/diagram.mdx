@@ -62,8 +62,8 @@ curl "https://aviation-api.logostream.dev/v1/airport-diagram/EDDF/runways" \
       "surface": "ASP",
       "lighted": true,
       "closed": false,
-      "threshold_low": { "lat": 50.0264, "lon": 8.5345 },
-      "threshold_high": { "lat": 50.0361, "lon": 8.6234 }
+      "threshold_low": { "lat": 50.0264, "lng": 8.5345 },
+      "threshold_high": { "lat": 50.0361, "lng": 8.6234 }
     }
   ],
   "geojson": {
@@ -221,8 +221,8 @@ curl "https://aviation-api.logostream.dev/v1/airport-diagram?country_code=DE" \
 | `surface` | string | Surface code: `ASP` (asphalt), `CON` (concrete), `GRS` (grass), `GRV` (gravel), `WAT` (water), etc. |
 | `lighted` | boolean | Whether runway has lighting |
 | `closed` | boolean | Whether runway is currently closed |
-| `threshold_low` | object \| null | `{ lat, lon }` for the lower-numbered threshold |
-| `threshold_high` | object \| null | `{ lat, lon }` for the higher-numbered threshold |
+| `threshold_low` | object \| null | `{ lat, lng }` for the lower-numbered threshold |
+| `threshold_high` | object \| null | `{ lat, lng }` for the higher-numbered threshold |
 
 ### GeoJSON feature types
 
