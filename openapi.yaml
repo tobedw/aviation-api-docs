@@ -82,8 +82,6 @@ components:
           type: string
           example: https://airlines-api.logostream.dev/airports/icao/EDDF?variant=logo-white&key=YOUR_API_KEY
 
-    Airline:
-
     HubEntry:
       type: object
       description: Curated hub or focus-city assignment between an airline and an airport.
