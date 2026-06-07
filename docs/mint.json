@@ -42,6 +42,13 @@
       ]
     },
     {
+      "group": "MCP Server",
+      "pages": [
+        "mcp/overview",
+        "mcp/tools"
+      ]
+    },
+    {
       "group": "Logo API",
       "pages": [
         "logo/authentication",

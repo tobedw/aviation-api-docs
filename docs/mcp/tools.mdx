@@ -1,0 +1,253 @@
+---
+title: "Tool Reference"
+description: "All available MCP tools with parameters and examples"
+---
+
+All tools are called via `tools/call` with a `name` and `arguments` object.
+
+Parameters marked `*` are required. For tools that say "provide one of", at least one of the listed parameters must be present.
+
+---
+
+## `get_airline`
+
+Look up an airline by IATA or ICAO code.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `iata` | string | one of | 2-letter IATA code, e.g. `LH` |
+| `icao` | string | one of | 3-letter ICAO code, e.g. `DLH` |
+
+```json
+{ "name": "get_airline", "arguments": { "iata": "LH" } }
+```
+
+---
+
+## `get_airport`
+
+Look up an airport by IATA or ICAO code.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `iata` | string | one of | 3-letter IATA code, e.g. `FRA` |
+| `icao` | string | one of | 4-letter ICAO code, e.g. `EDDF` |
+
+```json
+{ "name": "get_airport", "arguments": { "iata": "FRA" } }
+```
+
+---
+
+## `get_routes`
+
+List routes filtered by origin, destination, and/or airline. Provide at least one filter.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `from` | string | one of | Origin airport IATA |
+| `to` | string | one of | Destination airport IATA |
+| `airline` | string | one of | Airline IATA |
+| `limit` | integer | — | Max results, 1–50 (default 20) |
+| `offset` | integer | — | Pagination offset (default 0) |
+
+```json
+{ "name": "get_routes", "arguments": { "from": "FRA", "to": "JFK" } }
+```
+
+---
+
+## `get_route_map`
+
+Generate a great-circle route map as SVG or PNG.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `stops` | string | one of | Comma-separated IATA codes, e.g. `FRA,DXB,SYD` |
+| `from` | string | one of | Origin airport IATA |
+| `to` | string | one of | Destination airport IATA |
+| `format` | string | — | `svg` or `png` (default `svg`) |
+
+Returns raw SVG/PNG content as a string in `result.content[0].text`.
+
+```json
+{ "name": "get_route_map", "arguments": { "stops": "FRA,DXB,SYD", "format": "svg" } }
+```
+
+---
+
+## `get_city`
+
+Look up a city by IATA city code.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `iata` | string | * | IATA city code, e.g. `NYC` |
+
+```json
+{ "name": "get_city", "arguments": { "iata": "NYC" } }
+```
+
+---
+
+## `get_country`
+
+Look up a country by ISO 3166-1 alpha-2 code.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `code` | string | * | ISO-2 code, e.g. `DE` |
+
+```json
+{ "name": "get_country", "arguments": { "code": "DE" } }
+```
+
+---
+
+## `get_aircraft`
+
+Look up an aircraft type by IATA type code.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `type` | string | * | Aircraft type code, e.g. `A320`, `B77W` |
+
+```json
+{ "name": "get_aircraft", "arguments": { "type": "A320" } }
+```
+
+---
+
+## `get_stats`
+
+Network statistics for an airport or airline. Provide exactly one of `airport` or `airline`.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `airport` | string | one of | Airport IATA, e.g. `FRA` — exactly 3 uppercase letters |
+| `airline` | string | one of | Airline IATA, e.g. `LH` — exactly 2 uppercase letters |
+
+```json
+{ "name": "get_stats", "arguments": { "airport": "FRA" } }
+```
+
+---
+
+## `get_connections`
+
+Find one-stop connecting flight options between two airports.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `from` | string | * | Origin airport IATA |
+| `to` | string | * | Destination airport IATA |
+
+```json
+{ "name": "get_connections", "arguments": { "from": "FRA", "to": "SYD" } }
+```
+
+---
+
+## `get_routes_country_pair`
+
+All routes between two countries.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `from` | string | * | Origin country ISO-2, e.g. `DE` |
+| `to` | string | * | Destination country ISO-2, e.g. `JP` |
+| `limit` | integer | — | Max results, 1–50 (default 20) |
+| `offset` | integer | — | Pagination offset |
+
+```json
+{ "name": "get_routes_country_pair", "arguments": { "from": "DE", "to": "JP" } }
+```
+
+---
+
+## `plan_trip`
+
+Plan a multi-leg trip from an ordered list of airport IATA codes.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `stops` | string | * | Ordered comma-separated IATA codes, e.g. `FRA,DXB,SIN,SYD` |
+
+```json
+{ "name": "plan_trip", "arguments": { "stops": "FRA,DXB,SIN,SYD" } }
+```
+
+---
+
+## `get_hubs`
+
+List hub airports, optionally filtered by airline or airport.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `airline` | string | — | Filter by airline IATA |
+| `airport` | string | — | Filter by airport IATA |
+| `limit` | integer | — | Max results, 1–50 (default 20) |
+| `offset` | integer | — | Pagination offset |
+
+```json
+{ "name": "get_hubs", "arguments": { "airline": "LH" } }
+```
+
+---
+
+## `get_airport_map`
+
+Generate a map with multiple airports plotted as SVG or PNG.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `codes` | string | * | Comma-separated IATA codes, e.g. `FRA,JFK,DXB` |
+| `format` | string | — | `svg` or `png` (default `svg`) |
+
+Returns raw SVG/PNG content as a string in `result.content[0].text`.
+
+```json
+{ "name": "get_airport_map", "arguments": { "codes": "FRA,JFK,DXB", "format": "svg" } }
+```
+
+---
+
+## `get_airport_diagram`
+
+Detailed airport layout diagram by ICAO code.
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `icao` | string | * | 4-letter ICAO code, e.g. `EDDF` — exactly 4 uppercase letters |
+
+```json
+{ "name": "get_airport_diagram", "arguments": { "icao": "EDDF" } }
+```
+
+---
+
+## Pagination
+
+Paginated tools (`get_routes`, `get_routes_country_pair`, `get_hubs`) support:
+
+| Parameter | Default | Max |
+|---|---|---|
+| `limit` | 20 | 50 |
+| `offset` | 0 | — |
+
+```json
+{ "name": "get_routes", "arguments": { "from": "FRA", "limit": 50, "offset": 50 } }
+```
+
+---
+
+## Input Validation
+
+| Field | Format | Error |
+|---|---|---|
+| `get_stats.airport` | `/^[A-Z]{3}$/` | `airport must be a 3-letter IATA code.` |
+| `get_stats.airline` | `/^[A-Z]{2}$/` | `airline must be a 2-letter IATA code.` |
+| `get_airport_diagram.icao` | `/^[A-Z]{4}$/` | `icao must be a 4-letter ICAO code.` |
+
+All codes must be uppercase. Lowercase input will be rejected.

@@ -1,0 +1,244 @@
+---
+title: "MCP Server"
+description: "Connect the Logostream Aviation API to AI agents via Model Context Protocol"
+---
+
+## Overview
+
+The Logostream Aviation MCP Server exposes the Aviation API as a [Model Context Protocol](https://modelcontextprotocol.io) (MCP) server running on Cloudflare Workers.
+
+| | |
+|---|---|
+| **Base URL** | `https://aviation-mcp.logostream.dev` |
+| **Protocol** | MCP 2024-11-05, Streamable HTTP transport |
+| **Upstream API** | `https://aviation-api.logostream.dev/v1` |
+
+---
+
+## Authentication
+
+Pass your API key as an HTTP header on every request. The key is never a tool parameter — it is part of the transport layer.
+
+```
+x-api-key: YOUR_API_KEY
+```
+
+The MCP server forwards your key to the upstream Aviation API unchanged.
+
+| Case | Result |
+|---|---|
+| Missing key | JSON-RPC error `-32001` |
+| Invalid key | Upstream rejects → `"Internal error."` |
+| Valid key | Request proceeds |
+
+---
+
+## Transport
+
+Implements [Streamable HTTP transport](https://spec.modelcontextprotocol.io/specification/2024-11-05/basic/transports/#streamable-http) from the MCP spec.
+
+- **Method:** `POST`
+- **Content-Type:** `application/json`
+- **Response:** Single JSON object (no streaming required for tool calls)
+- **GET requests:** Return `200 OK` (SSE stub for clients that probe the endpoint)
+
+<CodeGroup>
+
+```json Request
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {
+    "name": "get_airline",
+    "arguments": { "iata": "LH" }
+  }
+}
+```
+
+```json Success response
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [
+      { "type": "text", "text": "{...json data...}" }
+    ]
+  }
+}
+```
+
+```json Tool error
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "isError": true,
+    "content": [
+      { "type": "text", "text": "Provide one of: iata, icao." }
+    ]
+  }
+}
+```
+
+```json Transport error
+{
+  "jsonrpc": "2.0",
+  "id": null,
+  "error": {
+    "code": -32001,
+    "message": "Missing x-api-key header on MCP transport."
+  }
+}
+```
+
+</CodeGroup>
+
+---
+
+## MCP Methods
+
+| Method | Description |
+|---|---|
+| `initialize` | MCP handshake — returns server capabilities |
+| `notifications/initialized` | Client ready signal — returns `204 No Content` |
+| `ping` | Health check — returns `{}` |
+| `tools/list` | Returns all available tools with input schemas |
+| `tools/call` | Executes a tool |
+
+All methods require `x-api-key`. Only `tools/call` hits the upstream API.
+
+---
+
+## Rate Limiting
+
+- **Limit:** 120 requests per minute per API key
+- **Response on exceeded:** HTTP `429`
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": null,
+  "error": {
+    "code": -32029,
+    "message": "Rate limit exceeded. Max 120 requests per minute."
+  }
+}
+```
+
+---
+
+## Constraints
+
+| Constraint | Value |
+|---|---|
+| Request body max size | 64 KB |
+| Upstream request timeout | 8 seconds |
+| Rate limit | 120 req/min per key |
+| Max results per paginated call | 50 |
+| Default results per paginated call | 20 |
+
+---
+
+## Error Codes
+
+| Code | Meaning |
+|---|---|
+| `-32700` | Parse error (malformed JSON or body > 64 KB) |
+| `-32601` | Method not found |
+| `-32602` | Invalid params |
+| `-32001` | Missing `x-api-key` header |
+| `-32029` | Rate limit exceeded |
+| `-32603` | Internal error (upstream failure or timeout) |
+
+Tool-level validation errors are returned as `result.isError: true`, not as JSON-RPC errors.
+
+---
+
+## Integration
+
+<CodeGroup>
+
+```json Claude Desktop
+// ~/Library/Application Support/Claude/claude_desktop_config.json (macOS)
+// %APPDATA%\Claude\claude_desktop_config.json (Windows)
+{
+  "mcpServers": {
+    "logostream-aviation": {
+      "type": "http",
+      "url": "https://aviation-mcp.logostream.dev",
+      "headers": {
+        "x-api-key": "YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+```typescript TypeScript / Node.js
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StreamableHTTPClientTransport } from "@modelcontextprotocol/sdk/client/streamableHttp.js";
+
+const client = new Client({ name: "my-agent", version: "1.0.0" });
+
+await client.connect(
+  new StreamableHTTPClientTransport(
+    new URL("https://aviation-mcp.logostream.dev"),
+    {
+      requestInit: {
+        headers: { "x-api-key": "YOUR_API_KEY" }
+      }
+    }
+  )
+);
+
+const { tools } = await client.listTools();
+const result = await client.callTool({
+  name: "get_airline",
+  arguments: { iata: "LH" }
+});
+const data = JSON.parse(result.content[0].text);
+```
+
+```python Python
+import httpx, json
+
+BASE_URL = "https://aviation-mcp.logostream.dev"
+API_KEY = "YOUR_API_KEY"
+
+def call_tool(name: str, arguments: dict) -> dict:
+    response = httpx.post(
+        BASE_URL,
+        headers={"x-api-key": API_KEY, "Content-Type": "application/json"},
+        json={
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {"name": name, "arguments": arguments}
+        },
+        timeout=10.0
+    )
+    response.raise_for_status()
+    result = response.json()
+    if result.get("result", {}).get("isError"):
+        raise ValueError(result["result"]["content"][0]["text"])
+    return json.loads(result["result"]["content"][0]["text"])
+
+airline = call_tool("get_airline", {"iata": "LH"})
+```
+
+```bash curl
+# Ping
+curl -X POST https://aviation-mcp.logostream.dev \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"ping"}'
+
+# List tools
+curl -X POST https://aviation-mcp.logostream.dev \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'
+```
+
+</CodeGroup>
