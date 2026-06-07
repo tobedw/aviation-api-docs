@@ -13,8 +13,9 @@ info:
     | **Aviation Data API** | `aviation-api.logostream.dev` | Structured data — airlines, airports, cities, countries, routes, maps |
     | **Logo API** | `airlines-api.logostream.dev` | Airline logos, airport logos, country flags (image responses) |
     | **Livery API** | `airlines-api.logostream.dev` | High-resolution aircraft livery images by airline ICAO/IATA or AWB number (PNG only) |
+    | **MCP Server** | `aviation-mcp.logostream.dev` | Model Context Protocol server — use the Aviation API directly from AI agents and Claude Desktop |
 
-    Both APIs authenticate via the `x-api-key` header.
+    All APIs authenticate via the `x-api-key` header.
 
     [Get your API key →](https://airline.logostream.dev)
   contact:
@@ -3278,3 +3279,179 @@ paths:
                     type: integer
         '400':
           description: No filter provided
+
+  /mcp:
+    x-internal-path: https://aviation-mcp.logostream.dev
+    post:
+      tags:
+        - MCP Server
+      summary: Call an MCP tool
+      operationId: mcpToolsCall
+      description: |
+        Send a JSON-RPC 2.0 request to the MCP server at `https://aviation-mcp.logostream.dev`.
+
+        **Base URL for all MCP requests:** `https://aviation-mcp.logostream.dev`
+
+        The MCP server exposes the full Aviation API as [Model Context Protocol](https://modelcontextprotocol.io) tools.
+        Use it to connect the Aviation API to AI agents, Claude Desktop, or any MCP-compatible client.
+
+        ### Available tools
+
+        | Tool | Description |
+        |---|---|
+        | `get_airline` | Look up airline by IATA or ICAO |
+        | `get_airport` | Look up airport by IATA or ICAO |
+        | `get_routes` | Routes by origin, destination, or airline |
+        | `get_route_map` | Great-circle map as SVG or PNG |
+        | `get_city` | City by IATA city code |
+        | `get_country` | Country by ISO-2 code |
+        | `get_aircraft` | Aircraft type by IATA code |
+        | `get_stats` | Network stats for airport or airline |
+        | `get_connections` | One-stop connections between two airports |
+        | `get_routes_country_pair` | All routes between two countries |
+        | `plan_trip` | Multi-leg trip planner |
+        | `get_hubs` | Hub/focus-city listings |
+        | `get_airport_map` | Multi-airport map as SVG or PNG |
+        | `get_airport_diagram` | Airport layout diagram by ICAO |
+
+        ### Claude Desktop integration
+
+        ```json
+        {
+          "mcpServers": {
+            "logostream-aviation": {
+              "type": "http",
+              "url": "https://aviation-mcp.logostream.dev",
+              "headers": { "x-api-key": "YOUR_API_KEY" }
+            }
+          }
+        }
+        ```
+
+        ### Rate limiting
+
+        120 requests per minute per API key. Exceeded limit returns HTTP 429 with JSON-RPC error code `-32029`.
+      servers:
+        - url: https://aviation-mcp.logostream.dev
+          description: MCP Server
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [jsonrpc, id, method]
+              properties:
+                jsonrpc:
+                  type: string
+                  enum: ["2.0"]
+                id:
+                  type: integer
+                  example: 1
+                method:
+                  type: string
+                  enum: [initialize, ping, tools/list, tools/call]
+                  example: tools/call
+                params:
+                  type: object
+                  properties:
+                    name:
+                      type: string
+                      example: get_airline
+                    arguments:
+                      type: object
+                      example: { "iata": "LH" }
+            examples:
+              tools_call:
+                summary: Call get_airline
+                value:
+                  jsonrpc: "2.0"
+                  id: 1
+                  method: tools/call
+                  params:
+                    name: get_airline
+                    arguments:
+                      iata: LH
+              tools_list:
+                summary: List all tools
+                value:
+                  jsonrpc: "2.0"
+                  id: 1
+                  method: tools/list
+              ping:
+                summary: Ping / health check
+                value:
+                  jsonrpc: "2.0"
+                  id: 1
+                  method: ping
+      responses:
+        '200':
+          description: JSON-RPC response (check `result.isError` for tool-level errors)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  jsonrpc:
+                    type: string
+                    example: "2.0"
+                  id:
+                    type: integer
+                    example: 1
+                  result:
+                    type: object
+                    properties:
+                      content:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            type:
+                              type: string
+                              example: text
+                            text:
+                              type: string
+                              example: '{"iata":"LH","name":"Lufthansa",...}'
+                      isError:
+                        type: boolean
+                        example: false
+              examples:
+                success:
+                  summary: Successful tool call
+                  value:
+                    jsonrpc: "2.0"
+                    id: 1
+                    result:
+                      content:
+                        - type: text
+                          text: '{"iata":"LH","name":"Lufthansa"}'
+                tool_error:
+                  summary: Tool-level error
+                  value:
+                    jsonrpc: "2.0"
+                    id: 1
+                    result:
+                      isError: true
+                      content:
+                        - type: text
+                          text: "Provide one of: iata, icao."
+        '401':
+          description: Missing x-api-key header
+          content:
+            application/json:
+              example:
+                jsonrpc: "2.0"
+                id: null
+                error:
+                  code: -32001
+                  message: "Missing x-api-key header on MCP transport."
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              example:
+                jsonrpc: "2.0"
+                id: null
+                error:
+                  code: -32029
+                  message: "Rate limit exceeded. Max 120 requests per minute."
