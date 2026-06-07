@@ -3399,8 +3399,11 @@ paths:
         **Other clients** — any client supporting remote MCP over Streamable HTTP works.
         Use the universal config and consult your client's docs for the config file location.
 
-        **Verify** — once installed, try *"Look up Lufthansa"* or *"What routes does FRA have?"*.
-        Your assistant should call the tool and return structured aviation data.
+        **Verify** — once installed, try this prompt:
+
+        > Which non-stop routes does Lufthansa operate from Frankfurt, and what aircraft types are used on the longest ones?
+
+        Your assistant will call `get_routes`, `get_stats`, and `get_airline` in sequence and return a structured answer with fleet data.
 
         ---
 
