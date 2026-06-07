@@ -3341,31 +3341,66 @@ paths:
 
         ### Install in your client
 
-        **Claude Desktop** — edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
+        Connect to Claude Desktop, Claude Code, Cursor, VS Code, Codex, Windsurf, ChatGPT,
+        and any other MCP-compatible client. Replace `YOUR_API_KEY` with your key from the
+        [developer dashboard](https://airline.logostream.dev). All clients use the same endpoint
+        and `x-api-key` header — only the config file location changes.
+
+        **Universal config** — same shape works in most clients:
 
         ```json
         {
           "mcpServers": {
             "logostream-aviation": {
-              "type": "http",
               "url": "https://aviation-mcp.logostream.dev",
-              "headers": { "x-api-key": "YOUR_API_KEY" }
+              "headers": {
+                "x-api-key": "YOUR_API_KEY"
+              }
             }
           }
         }
         ```
 
-        **Cursor / VS Code / Windsurf** — add to your MCP settings:
+        **Claude Code** — use the CLI:
 
-        ```json
-        {
-          "logostream-aviation": {
-            "type": "http",
-            "url": "https://aviation-mcp.logostream.dev",
-            "headers": { "x-api-key": "YOUR_API_KEY" }
-          }
-        }
+        ```bash
+        claude mcp add --transport http logostream-aviation \
+          https://aviation-mcp.logostream.dev \
+          --header "x-api-key: YOUR_API_KEY"
         ```
+
+        Add `--scope user` to make it available across all projects.
+
+        **Claude Desktop**
+        - macOS: `~/Library/Application Support/Claude/claude_desktop_config.json`
+        - Windows: `%APPDATA%\Claude\claude_desktop_config.json`
+
+        Merge the `logostream-aviation` entry into `mcpServers`, restart Claude Desktop.
+
+        **Cursor** — Settings → MCP or Command Palette → "MCP: Add Server", paste universal config, restart.
+
+        **VS Code** — Command Palette → "MCP: Add Server", or create `.vscode/mcp.json` with the universal config, reload window.
+
+        **Windsurf** — edit `~/.codeium/windsurf/mcp_config.json` (or Settings → Cascade → MCP), paste universal config, restart.
+
+        **Codex** — add to `~/.codex/config.toml`:
+
+        ```toml
+        [mcp_servers.logostream-aviation]
+        url = "https://aviation-mcp.logostream.dev"
+
+        [mcp_servers.logostream-aviation.headers]
+        x-api-key = "YOUR_API_KEY"
+        ```
+
+        **ChatGPT** (Pro/Team/Enterprise) — Settings → Connectors → Add MCP server.
+        URL: `https://aviation-mcp.logostream.dev`, header: `x-api-key: YOUR_API_KEY`.
+
+        **Other clients** — any client supporting remote MCP over Streamable HTTP works.
+        Use the universal config and consult your client's docs for the config file location.
+
+        **Verify** — once installed, try *"Look up Lufthansa"* or *"What routes does FRA have?"*.
+        Your assistant should call the tool and return structured aviation data.
 
         ---
 
