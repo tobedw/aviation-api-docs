@@ -3288,33 +3288,60 @@ paths:
       summary: Call an MCP tool
       operationId: mcpToolsCall
       description: |
-        Send a JSON-RPC 2.0 request to the MCP server at `https://aviation-mcp.logostream.dev`.
+        Connect Claude, Cursor, and other AI assistants to the Logostream Aviation database over the Model Context Protocol.
 
-        **Base URL for all MCP requests:** `https://aviation-mcp.logostream.dev`
+        ---
 
-        The MCP server exposes the full Aviation API as [Model Context Protocol](https://modelcontextprotocol.io) tools.
-        Use it to connect the Aviation API to AI agents, Claude Desktop, or any MCP-compatible client.
+        ### What it is
 
-        ### Available tools
+        The Logostream Aviation MCP server exposes the full aviation database to AI agents. Your agent can look up airlines,
+        airports, cities, routes, fleet data, and more — and receive structured responses it can reason over.
+
+        | | |
+        |---|---|
+        | **Endpoint** | `https://aviation-mcp.logostream.dev` |
+        | **Transport** | Streamable HTTP (JSON-RPC 2.0) |
+        | **Protocol version** | 2024-11-05 |
+        | **Authentication** | `x-api-key` header |
+
+        ---
+
+        ### Authentication
+
+        Pass your API key as a header on every request. The key is never a tool parameter.
+
+        ```
+        x-api-key: YOUR_API_KEY
+        ```
+
+        MCP requests count against the same quota as your regular API usage. Find your key in the [developer dashboard](https://airline.logostream.dev).
+
+        ---
+
+        ### Tools
 
         | Tool | Description |
         |---|---|
-        | `get_airline` | Look up airline by IATA or ICAO |
-        | `get_airport` | Look up airport by IATA or ICAO |
-        | `get_routes` | Routes by origin, destination, or airline |
-        | `get_route_map` | Great-circle map as SVG or PNG |
+        | `get_airline` | Look up airline by IATA or ICAO code |
+        | `get_airport` | Look up airport by IATA or ICAO code |
+        | `get_routes` | Routes filtered by origin, destination, or airline |
+        | `get_route_map` | Great-circle route map as SVG or PNG |
         | `get_city` | City by IATA city code |
         | `get_country` | Country by ISO-2 code |
-        | `get_aircraft` | Aircraft type by IATA code |
-        | `get_stats` | Network stats for airport or airline |
-        | `get_connections` | One-stop connections between two airports |
+        | `get_aircraft` | Aircraft type by IATA type code |
+        | `get_stats` | Network statistics for an airport or airline |
+        | `get_connections` | One-stop connection options between two airports |
         | `get_routes_country_pair` | All routes between two countries |
-        | `plan_trip` | Multi-leg trip planner |
-        | `get_hubs` | Hub/focus-city listings |
+        | `plan_trip` | Multi-leg trip planner from ordered IATA list |
+        | `get_hubs` | Hub and focus-city listings |
         | `get_airport_map` | Multi-airport map as SVG or PNG |
-        | `get_airport_diagram` | Airport layout diagram by ICAO |
+        | `get_airport_diagram` | Airport layout diagram by ICAO code |
 
-        ### Claude Desktop integration
+        ---
+
+        ### Install in your client
+
+        **Claude Desktop** — edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
         ```json
         {
@@ -3328,9 +3355,48 @@ paths:
         }
         ```
 
-        ### Rate limiting
+        **Cursor / VS Code / Windsurf** — add to your MCP settings:
 
-        120 requests per minute per API key. Exceeded limit returns HTTP 429 with JSON-RPC error code `-32029`.
+        ```json
+        {
+          "logostream-aviation": {
+            "type": "http",
+            "url": "https://aviation-mcp.logostream.dev",
+            "headers": { "x-api-key": "YOUR_API_KEY" }
+          }
+        }
+        ```
+
+        ---
+
+        ### Response shape
+
+        A successful tool call returns the data as JSON text in `result.content[0].text`.
+        Parse it with `JSON.parse()` in your agent code.
+
+        When a resource cannot be found, the tool returns `result.isError: true` with a descriptive message
+        rather than a JSON-RPC error — so your agent can recover gracefully.
+
+        ---
+
+        ### Errors
+
+        | Code | Meaning |
+        |---|---|
+        | `-32001` | Unauthorized — missing or invalid `x-api-key` |
+        | `-32029` | Rate limit exceeded (120 req/min per key) |
+        | `-32601` | Method not found |
+        | `-32602` | Invalid arguments — unknown tool or missing required parameter |
+        | `-32700` | Parse error — malformed JSON or body > 64 KB |
+        | `-32603` | Internal server error |
+
+        ---
+
+        ### Usage and quotas
+
+        MCP requests count against the same quota as your regular API usage.
+        Rate limit: **120 requests per minute** per API key.
+        Exceeded limit returns HTTP 429 with JSON-RPC error code `-32029`.
       servers:
         - url: https://aviation-mcp.logostream.dev
           description: MCP Server
