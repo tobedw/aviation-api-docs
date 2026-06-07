@@ -3399,7 +3399,25 @@ paths:
         **Other clients** — any client supporting remote MCP over Streamable HTTP works.
         Use the universal config and consult your client's docs for the config file location.
 
-        **Verify** — once installed, try this prompt:
+        **Verify with curl** — test the connection directly before wiring up a client:
+
+        ```bash
+        curl https://aviation-mcp.logostream.dev \
+          --request POST \
+          --header 'Content-Type: application/json' \
+          --header 'x-api-key: YOUR_API_KEY' \
+          --data '{
+            "jsonrpc": "2.0",
+            "id": 1,
+            "method": "tools/call",
+            "params": {
+              "name": "get_airline",
+              "arguments": { "iata": "LH" }
+            }
+          }'
+        ```
+
+        **Verify with your AI client** — once installed, try this prompt:
 
         > Which non-stop routes does Lufthansa operate from Frankfurt, and what aircraft types are used on the longest ones?
 
