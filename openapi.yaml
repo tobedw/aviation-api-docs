@@ -3296,6 +3296,8 @@ paths:
 
         **Filter logic:** `iata`/`icao` use OR logic (matches either). Combining airline + airport filters uses AND logic (story must match both).
 
+        **Translation:** Add `lang` (BCP-47) to translate `title` and `summary`. Uses a 3-tier cache (KV → Supabase → Google Translate) — first request for a language is slower, subsequent requests are served from cache.
+
         ### Categories
 
         | Value | Description |
@@ -3365,6 +3367,12 @@ paths:
             type: string
             enum: [positive, neutral, negative]
           example: negative
+        - name: lang
+          in: query
+          description: "Translate `title` and `summary` (BCP-47, e.g. `de`, `fr`, `zh-CN`). Default: `en`. First request per language may be slower — subsequent requests are cached."
+          schema:
+            type: string
+          example: de
         - name: limit
           in: query
           description: Page size (default 50)
@@ -3396,11 +3404,11 @@ paths:
                           example: 550e8400-e29b-41d4-a716-446655440000
                         title:
                           type: string
-                          description: AI-generated English title (max 120 chars)
+                          description: AI-generated title (max 120 chars, translated if `lang` set)
                           example: Lufthansa Increases ITA Airways Stake to 90%
                         summary:
                           type: string
-                          description: AI-generated English summary (50–60 words)
+                          description: AI-generated summary (50–60 words, translated if `lang` set)
                           example: Lufthansa Group has increased its stake in ITA Airways to 90%, moving closer to full acquisition.
                         sentiment:
                           type: string
