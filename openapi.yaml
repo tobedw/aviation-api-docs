@@ -3280,6 +3280,253 @@ paths:
         '400':
           description: No filter provided
 
+  /v1/news:
+    get:
+      tags:
+        - Aviation Data API
+      summary: Aviation news stories
+      operationId: getNews
+      description: |
+        Returns AI-consolidated aviation news stories. Multiple raw articles covering the same event are
+        grouped into a single story with a generated title, summary, sentiment, category, and entity associations.
+
+        Stories are updated hourly by a consolidation pipeline that crawls RSS feeds, then uses Claude to
+        match new articles against existing stories and classify new ones. Entity associations (airlines,
+        airports, aircraft types) are resolved against the database — no hallucinated codes.
+
+        **Filter logic:** `iata`/`icao` use OR logic (matches either). Combining airline + airport filters uses AND logic (story must match both).
+
+        ### Categories
+
+        | Value | Description |
+        |---|---|
+        | `fleet_order` | Aircraft orders, deliveries |
+        | `route_launch` | New routes, frequency changes |
+        | `accident` | Accidents, incidents, safety |
+        | `financial` | Results, revenue, costs |
+        | `labor` | Strikes, unions, staffing |
+        | `regulation` | Regulation, slots, legislation |
+        | `partnership` | Codeshares, alliances, acquisitions |
+        | `operations` | Delays, cancellations, schedule |
+        | `sustainability` | SAF, CO2, green initiatives |
+        | `technology` | IFE, digital, apps |
+        | `general` | Other aviation news |
+      parameters:
+        - name: iata
+          in: query
+          description: Filter by airline IATA code
+          schema:
+            type: string
+            maxLength: 3
+          example: LH
+        - name: icao
+          in: query
+          description: Filter by airline ICAO code
+          schema:
+            type: string
+            maxLength: 4
+          example: DLH
+        - name: airport_iata
+          in: query
+          description: Filter by airport IATA code
+          schema:
+            type: string
+            maxLength: 4
+          example: FRA
+        - name: airport_icao
+          in: query
+          description: Filter by airport ICAO code
+          schema:
+            type: string
+            maxLength: 4
+          example: EDDF
+        - name: category
+          in: query
+          description: Filter by story category
+          schema:
+            type: string
+            enum:
+              - fleet_order
+              - route_launch
+              - accident
+              - financial
+              - labor
+              - regulation
+              - partnership
+              - operations
+              - sustainability
+              - technology
+              - general
+          example: partnership
+        - name: sentiment
+          in: query
+          description: Filter by sentiment
+          schema:
+            type: string
+            enum: [positive, neutral, negative]
+          example: negative
+        - name: limit
+          in: query
+          description: Page size (default 50)
+          schema:
+            type: integer
+            default: 50
+        - name: offset
+          in: query
+          description: Pagination offset (default 0)
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: Paginated list of consolidated news stories
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          format: uuid
+                          example: 550e8400-e29b-41d4-a716-446655440000
+                        title:
+                          type: string
+                          description: AI-generated English title (max 120 chars)
+                          example: Lufthansa Increases ITA Airways Stake to 90%
+                        summary:
+                          type: string
+                          description: AI-generated English summary (50–60 words)
+                          example: Lufthansa Group has increased its stake in ITA Airways to 90%, moving closer to full acquisition.
+                        sentiment:
+                          type: string
+                          enum: [positive, neutral, negative]
+                          example: neutral
+                        category:
+                          type: string
+                          example: partnership
+                        published_at:
+                          type: string
+                          format: date-time
+                          example: "2026-06-02T10:00:00Z"
+                        updated_at:
+                          type: string
+                          format: date-time
+                          example: "2026-06-03T08:15:00Z"
+                        source_count:
+                          type: integer
+                          example: 3
+                        sources:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              name:
+                                type: string
+                                example: Simple Flying
+                              url:
+                                type: string
+                                example: https://simpleflying.com/example
+                        associated_airlines:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                              name:
+                                type: string
+                                example: Lufthansa
+                              iata:
+                                type: string
+                                example: LH
+                              icao:
+                                type: string
+                                example: DLH
+                        associated_airports:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              id:
+                                type: integer
+                              name:
+                                type: string
+                                example: Frankfurt Airport
+                              iata:
+                                type: string
+                                example: FRA
+                              icao:
+                                type: string
+                                example: EDDF
+                        associated_aircraft_types:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              iata:
+                                type: string
+                                example: "359"
+                              icao:
+                                type: string
+                                example: A359
+                              name:
+                                type: string
+                                example: Airbus A350-900
+                              manufacturer:
+                                type: string
+                                example: Airbus
+                  total:
+                    type: integer
+                    example: 42
+                  limit:
+                    type: integer
+                    example: 50
+                  offset:
+                    type: integer
+                    example: 0
+              example:
+                data:
+                  - id: 550e8400-e29b-41d4-a716-446655440000
+                    title: Lufthansa Increases ITA Airways Stake to 90%
+                    summary: Lufthansa Group has increased its stake in ITA Airways to 90%, moving closer to full acquisition.
+                    sentiment: neutral
+                    category: partnership
+                    published_at: "2026-06-02T10:00:00Z"
+                    updated_at: "2026-06-03T08:15:00Z"
+                    source_count: 3
+                    sources:
+                      - name: Simple Flying
+                        url: https://simpleflying.com/example
+                      - name: World Airline News
+                        url: https://worldairlinenews.com/example
+                    associated_airlines:
+                      - id: 96601
+                        name: Lufthansa
+                        iata: LH
+                        icao: DLH
+                      - id: 12345
+                        name: ITA Airways
+                        iata: AZ
+                        icao: ITY
+                    associated_airports:
+                      - id: 789
+                        name: Frankfurt Airport
+                        iata: FRA
+                        icao: EDDF
+                    associated_aircraft_types:
+                      - iata: "359"
+                        icao: A359
+                        name: Airbus A350-900
+                        manufacturer: Airbus
+                total: 42
+                limit: 50
+                offset: 0
+
   /mcp:
     x-internal-path: https://aviation-mcp.logostream.dev
     post:
