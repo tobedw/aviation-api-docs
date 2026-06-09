@@ -3591,6 +3591,7 @@ paths:
         | `get_hubs` | Hub and focus-city listings |
         | `get_airport_map` | Multi-airport map as SVG or PNG |
         | `get_airport_diagram` | Airport layout diagram by ICAO code |
+        | `get_news` | AI-consolidated aviation news stories, filterable by airline, airport, category, and sentiment |
 
         ---
 
@@ -3749,6 +3750,30 @@ paths:
                     name: get_airline
                     arguments:
                       iata: LH
+              get_news:
+                summary: Call get_news (Lufthansa partnership news)
+                value:
+                  jsonrpc: "2.0"
+                  id: 1
+                  method: tools/call
+                  params:
+                    name: get_news
+                    arguments:
+                      iata: LH
+                      category: partnership
+                      limit: 10
+              get_news_translated:
+                summary: Call get_news with German translation
+                value:
+                  jsonrpc: "2.0"
+                  id: 1
+                  method: tools/call
+                  params:
+                    name: get_news
+                    arguments:
+                      airport_iata: FRA
+                      sentiment: negative
+                      lang: de
               tools_list:
                 summary: List all tools
                 value:
