@@ -3557,17 +3557,41 @@ paths:
         | **Endpoint** | `https://aviation-mcp.logostream.dev` |
         | **Transport** | Streamable HTTP (JSON-RPC 2.0) |
         | **Protocol version** | 2024-11-05 |
-        | **Authentication** | `x-api-key` header |
+        | **Authentication** | `x-api-key` header **or** OAuth 2.0 Bearer token |
 
         ---
 
         ### Authentication
+
+        Two methods are supported — both are backwards compatible.
+
+        **Option 1 — API Key header** (direct clients, curl, SDK)
 
         Pass your API key as a header on every request. The key is never a tool parameter.
 
         ```
         x-api-key: YOUR_API_KEY
         ```
+
+        **Option 2 — OAuth 2.0 with PKCE** (claude.ai Web, ChatGPT, hosts that require OAuth)
+
+        The server implements OAuth 2.0 Authorization Code Flow with PKCE (RFC 7636) and Dynamic Client Registration (RFC 7591).
+        OAuth hosts discover and negotiate the flow automatically — no manual config required.
+
+        | OAuth Endpoint | Description |
+        |---|---|
+        | `GET /.well-known/oauth-authorization-server` | Metadata discovery (RFC 8414) |
+        | `POST /register` | Dynamic Client Registration — returns `client_id` |
+        | `GET /authorize` | Login page — user enters their API key |
+        | `POST /authorize` | Generates auth code → redirects to `redirect_uri?code=…` |
+        | `POST /token` | Exchanges auth code for Bearer token (PKCE verified) |
+
+        Token lifetime: auth codes **10 minutes** (single use), access tokens **1 hour**.
+
+        **Add to claude.ai Web:**
+        1. Settings → Integrations → Add custom connector
+        2. URL: `https://aviation-mcp.logostream.dev`
+        3. OAuth flow starts automatically → enter your API key → done
 
         MCP requests count against the same quota as your regular API usage. Find your key in the [developer dashboard](https://airline.logostream.dev).
 
