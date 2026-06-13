@@ -11,6 +11,7 @@ info:
     | API | Base URL | Purpose |
     |-----|----------|---------|
     | **Aviation Data API** | `aviation-api.logostream.dev` | Structured data — airlines, airports, cities, countries, routes, maps |
+    | **Carbon API** | `aviation-api.logostream.dev` | `POST /v1/carbon` — CO₂ emissions per ICAO CEC v13.1, accepts structured or raw text input |
     | **Logo API** | `airlines-api.logostream.dev` | Airline logos, airport logos, country flags (image responses) |
     | **Livery API** | `airlines-api.logostream.dev` | High-resolution aircraft livery images by airline ICAO/IATA or AWB number (PNG only) |
     | **MCP Server** | `aviation-mcp.logostream.dev` | Model Context Protocol server — use the Aviation API directly from AI agents and Claude Desktop |
@@ -3881,3 +3882,307 @@ paths:
                 error:
                   code: -32029
                   message: "Rate limit exceeded. Max 120 requests per minute."
+
+  /v1/carbon:
+    post:
+      summary: CO₂ emissions calculator (ICAO CEC v13.1)
+      description: |
+        Calculates flight CO₂ emissions per ICAO Carbon Emissions Calculator v13.1 — CSRD-compliant.
+
+        Accepts either **structured input** (`from` + `to`) or **raw text** (`raw_text`). Raw text accepts IATA codes, dash-chains, SITA/ACARS messages, booking confirmation snippets, and boarding pass OCR output.
+
+        **Parse pipeline (raw_text):**
+        1. Regex — flight number, IATA codes, dash-chains, SITA preprocessing
+        2. Supabase upstream validation — airports, airline, seat config (parallel)
+        3. Workers AI fallback — llama-3.1-8b, for natural language when stage 2 is incomplete
+
+        **ICAO code resolution (structured input):**
+        4-letter ICAO airport codes (e.g. `EDDF`) and 3-letter ICAO airline codes (e.g. `DLH`) are automatically resolved to IATA before calculation.
+
+        **Accepted raw_text formats:**
+        - IATA codes: `LH400 FRA JFK A350`
+        - Dash-chain: `FRA-DXB-SYD A380`
+        - Via-keyword: `FRA via DXB to SYD EK A380`
+        - SITA MVT: `MVT LH/400 .FRA1025 .JFK1310 A359`
+        - Booking email snippet: `Flight: LH 400 From: FRA To: JFK Aircraft: A350-900`
+
+        **Known limitations:**
+        - Flight number only (`LH400`) — no result without a schedule database
+        - Arrival-only SITA (`ARR DLH400 BER`) — departure airport unknown
+        - ICAO airport codes in `raw_text` (e.g. `EDDF`) — not auto-resolved in free text; use structured `from`/`to` instead
+        - City-name-only input — LLM fallback, unreliable for short or ambiguous inputs
+
+        **Plan gating:** requires Starter plan or higher. Community keys receive HTTP 403.
+      tags:
+        - Aviation Data API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                raw_text:
+                  type: string
+                  description: "Any text containing flight info — booking confirmation, SITA message, boarding pass OCR. Use instead of `from`/`to`."
+                  example: "LH400 FRA JFK A350"
+                from:
+                  type: string
+                  description: "Origin airport — IATA (FRA) or ICAO (EDDF). Required if `raw_text` is omitted."
+                  example: "FRA"
+                to:
+                  type: string
+                  description: "Destination airport — IATA (JFK) or ICAO (KJFK). Required if `raw_text` is omitted."
+                  example: "JFK"
+                stopovers:
+                  type: string
+                  description: "Comma-separated intermediate stops — IATA or ICAO codes. Only used with structured input."
+                  example: "DXB,SIN"
+                aircraft:
+                  type: string
+                  description: "Aircraft type — accepts common aliases: A350, B777, A380, B737MAX, etc."
+                  example: "A350"
+                airline:
+                  type: string
+                  description: "Airline IATA (LH) or ICAO (DLH). Used to look up real seat dimensions for yseat calculation."
+                  example: "LH"
+                cabin_class:
+                  type: string
+                  enum: [economy, premium_economy, business, first]
+                  default: economy
+                  description: "Passenger cabin class for per-seat CO₂ calculation."
+                passengers:
+                  type: integer
+                  minimum: 1
+                  maximum: 1000
+                  default: 1
+                  description: "Number of passengers. Adds `co2_total_kg` and `group_total` offset costs to the response."
+            examples:
+              structured:
+                summary: Structured input
+                value:
+                  from: "FRA"
+                  to: "JFK"
+                  aircraft: "A350"
+                  airline: "LH"
+                  cabin_class: "business"
+                  passengers: 2
+              raw_text:
+                summary: Raw text input
+                value:
+                  raw_text: "LH400 FRA JFK A350"
+                  cabin_class: "economy"
+              icao_codes:
+                summary: ICAO codes (auto-resolved)
+                value:
+                  from: "EDDF"
+                  to: "YSSY"
+                  stopovers: "OMDB,WSSS"
+                  aircraft: "A380"
+                  airline: "DLH"
+                  passengers: 3
+              sita:
+                summary: SITA MVT message
+                value:
+                  raw_text: "MVT LH/400 .FRA1025 .JFK1310 A359"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: success
+                  confidence_score:
+                    type: number
+                    description: "Parse confidence 0–1. <0.6 = unreliable input. 0.55 = aircraft fallback used."
+                    example: 0.92
+                  parse_stage:
+                    type: string
+                    enum: [regex, regex+upstream, regex+upstream+llm]
+                    example: regex+upstream
+                  parsed_data:
+                    type: object
+                    properties:
+                      flight_number:
+                        type: string
+                        nullable: true
+                        example: LH400
+                      route:
+                        type: object
+                        properties:
+                          origin:
+                            type: object
+                            properties:
+                              iata: { type: string, example: FRA }
+                              city: { type: string, example: Frankfurt am Main }
+                              airport: { type: string, example: Frankfurt am Main }
+                              country_code: { type: string, example: DE }
+                          stopovers:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                iata: { type: string }
+                                city: { type: string, nullable: true }
+                                airport: { type: string, nullable: true }
+                                validated: { type: boolean }
+                          destination:
+                            type: object
+                            properties:
+                              iata: { type: string, example: JFK }
+                              city: { type: string, example: New York City }
+                              airport: { type: string, example: John F Kennedy International }
+                              country_code: { type: string, example: US }
+                          distance_km: { type: integer, example: 6314 }
+                          distance_nm: { type: integer, example: 3409 }
+                      aircraft:
+                        type: object
+                        properties:
+                          requested: { type: string, nullable: true, example: A350 }
+                          icao_mapped_type: { type: string, example: "359" }
+                          fallback_used: { type: boolean, example: false }
+                  sustainability_metrics:
+                    type: object
+                    properties:
+                      methodology: { type: string, example: "ICAO Carbon Emissions Calculator v13.1" }
+                      icao_route_group: { type: integer, example: 17 }
+                      icao_route_regions: { type: string, example: "EUR:NAM" }
+                      rfi_factor: { type: number, example: 1.9 }
+                      rfi_note: { type: string }
+                      legs:
+                        type: array
+                        description: Per-leg breakdown. Each segment calculated independently per ICAO methodology.
+                        items:
+                          type: object
+                          properties:
+                            from: { type: string, example: FRA }
+                            to: { type: string, example: JFK }
+                            distance_km: { type: integer, example: 6314 }
+                            distance_nm: { type: integer, example: 3409 }
+                            fuel_burn_kg: { type: integer, example: 46635 }
+                            co2_kg: { type: number, example: 147365.6 }
+                            co2_with_rfi_kg: { type: number, example: 279994.7 }
+                      flight_totals:
+                        type: object
+                        properties:
+                          fuel_burn_kg: { type: integer, example: 46635 }
+                          co2_kg: { type: number, example: 147365.6 }
+                          co2_with_rfi_kg: { type: number, example: 279994.7 }
+                      passenger_footprint:
+                        type: object
+                        properties:
+                          cabin_class: { type: string, example: economy }
+                          passengers: { type: integer, example: 1 }
+                          co2_kg: { type: number, example: 411.0 }
+                          co2_with_rfi_kg: { type: number, example: 780.9 }
+                          co2_total_kg: { type: number, description: "Only present when passengers > 1", example: 822.0 }
+                          co2_total_with_rfi_kg: { type: number, description: "Only present when passengers > 1", example: 1561.8 }
+                          yseat_factor: { type: number, example: 1.0 }
+                          yseat_source: { type: string, enum: [dimensions, default_table] }
+                          passenger_load_factor: { type: number, example: 0.831 }
+                          pax_to_cargo_factor: { type: number, example: 0.7996 }
+                          seat_config_source: { type: string, enum: [airline_config, default_table] }
+                          total_seats: { type: integer, example: 369 }
+                          crf_weighted_seats: { type: integer, example: 369 }
+                      comparison:
+                        type: object
+                        properties:
+                          vs_train_eu_avg:
+                            type: object
+                            properties:
+                              train_co2_kg: { type: number, example: 88.4 }
+                              flight_is_x_times_more: { type: number, example: 4.6 }
+                              basis: { type: string }
+                          vs_car_eu_avg:
+                            type: object
+                            properties:
+                              car_co2_kg: { type: number, example: 757.7 }
+                              flight_vs_car_pct: { type: integer, example: -46, description: "Negative = flight cheaper than car" }
+                              basis: { type: string }
+                      carbon_offset:
+                        type: object
+                        properties:
+                          basis: { type: string }
+                          price_eur_per_tonne_co2: { type: integer, example: 65 }
+                          price_reference: { type: string, example: "2024-Q4" }
+                          per_passenger:
+                            type: object
+                            properties:
+                              co2_only_eur: { type: number, example: 26.72 }
+                              with_rfi_eur: { type: number, example: 50.76 }
+                          group_total:
+                            type: object
+                            description: "Only present when passengers > 1"
+                            properties:
+                              passengers: { type: integer }
+                              co2_only_eur: { type: number }
+                              with_rfi_eur: { type: number }
+                          total_flight_co2_only_eur: { type: number, example: 9578.77 }
+                      cabin_comparison:
+                        type: object
+                        description: CO₂ for all four cabin classes in one call.
+                        properties:
+                          economy:
+                            type: object
+                            properties:
+                              co2_kg: { type: number }
+                              co2_with_rfi_kg: { type: number }
+                              yseat_factor: { type: number }
+                              yseat_source: { type: string }
+                              available: { type: boolean }
+                              co2_note: { type: string, description: "Present when yseat_source = default_table" }
+                          premium_economy:
+                            $ref: '#/components/schemas/CabinEntry'
+                          business:
+                            $ref: '#/components/schemas/CabinEntry'
+                          first:
+                            $ref: '#/components/schemas/CabinEntry'
+                  visual_assets:
+                    type: object
+                    properties:
+                      airline_logo: { type: string, nullable: true, example: "https://airlines-api.logostream.dev/airlines/icao/DLH?key=..." }
+                      route_map_url: { type: string, nullable: true, example: "https://aviation-api.logostream.dev/v1/map/route?from=FRA&to=JFK&key=..." }
+                      ui_branding:
+                        type: object
+                        properties:
+                          primary_hex: { type: string, nullable: true, example: "#05164D" }
+                          secondary_hex: { type: string, nullable: true, example: "#FFCC00" }
+        '400':
+          description: Bad request — missing parameters or unresolvable airports
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              examples:
+                missing_params:
+                  value: { error: "Provide raw_text or both from and to." }
+                unresolvable:
+                  value: { error: "Could not identify origin and destination airports. Include valid 3-letter IATA codes (e.g. \"LH400 FRA JFK\"). City-name input is experimental and may fail." }
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '403':
+          description: Endpoint not available on community plan
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal error (upstream timeout, AI failure)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
