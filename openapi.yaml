@@ -3617,6 +3617,55 @@ paths:
         | `get_airport_map` | Multi-airport map as SVG or PNG |
         | `get_airport_diagram` | Airport layout diagram by ICAO code |
         | `get_news` | AI-consolidated aviation news stories, filterable by airline, airport, category, and sentiment |
+        | `parse_trip` | Parse any flight text → full CO₂ emissions report (ICAO CEC v13.1, CSRD-compliant) |
+
+        ---
+
+        ### CO₂ Emissions (`parse_trip`)
+
+        `parse_trip` accepts any unstructured text containing flight info and returns a complete sustainability report — no pre-processing needed.
+
+        **Input formats that work:**
+
+        | Input | Example |
+        |---|---|
+        | IATA codes + flight number | `LH400 FRA JFK A350` |
+        | Dash-chain route | `FRA-DXB-SYD A380 EK` |
+        | Via-keyword | `FRA via DXB to SYD` |
+        | SITA MVT message | `MVT LH/400 .FRA1025 .JFK1310 A359` |
+        | Booking confirmation snippet | `Flight: LH 400 From: FRA To: JFK Aircraft: A350-900` |
+
+        **Parameters:** `raw_text` (required), `cabin_class` (economy/premium_economy/business/first), `passengers` (integer, adds group totals)
+
+        **What the response includes:**
+        - CO₂ per passenger for the selected cabin class (`co2_kg`, `co2_with_rfi_kg`)
+        - Group total when `passengers > 1` (`co2_total_kg`, `carbon_offset.group_total`)
+        - Per-leg breakdown for multi-stop routes (each segment calculated independently)
+        - All four cabin classes in one call (`cabin_comparison`) — build a cabin picker without extra API calls
+        - Train and car comparison for the same distance
+        - Carbon offset cost at EU ETS price
+        - Confidence score + parse stage so you know how reliable the result is
+        - Airline logo URL, route map URL, brand colors (`visual_assets`)
+
+        **Example call:**
+
+        ```json
+        {
+          "jsonrpc": "2.0",
+          "id": 1,
+          "method": "tools/call",
+          "params": {
+            "name": "parse_trip",
+            "arguments": {
+              "raw_text": "LH400 FRA JFK A350",
+              "cabin_class": "business",
+              "passengers": 2
+            }
+          }
+        }
+        ```
+
+        **Known limitations:** flight-number-only input (`LH400`) fails without a schedule database. City-name-only input (`Frankfurt to New York`) is unreliable — always include IATA codes when possible.
 
         ---
 
