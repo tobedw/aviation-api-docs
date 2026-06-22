@@ -190,14 +190,6 @@ components:
         name:
           type: string
           example: Lufthansa
-        marketing_name:
-          type: string
-          nullable: true
-          example: Lufthansa
-        legal_name:
-          type: string
-          nullable: true
-          example: Deutsche Lufthansa AG
         three_digit_code:
           type: string
           nullable: true
@@ -218,10 +210,6 @@ components:
           type: string
           nullable: true
           example: Lufthansa Group
-        related_brand:
-          type: string
-          nullable: true
-          example: Austrian Airlines
         type:
           type: string
           example: Full service carrier
@@ -229,12 +217,6 @@ components:
           type: string
           nullable: true
           example: Passenger
-        lcc:
-          type: boolean
-          nullable: true
-          description: True if classified as a low-cost carrier
-        is_lowcost:
-          type: boolean
         is_oneworld:
           type: boolean
         is_staralliance:
@@ -245,19 +227,27 @@ components:
           type: boolean
           nullable: true
         defunct:
-          type: boolean
+          type: string
           nullable: true
+          description: Year the airline ceased operations as text (e.g. "2019"), or null if still active
+          example: "2019"
         defunct_reason:
           type: string
           nullable: true
+        callsign:
+          type: string
+          nullable: true
+          description: ICAO radio callsign (e.g. "LUFTHANSA")
+          example: LUFTHANSA
         year_founded:
           type: integer
           nullable: true
           example: 1953
-        base_city_iata:
+        commenced_operations:
           type: string
           nullable: true
-          example: FRA
+          description: Year operations commenced as text
+          example: "1955"
         hubs:
           type: array
           description: Curated primary/secondary hub airports for this airline.
@@ -313,14 +303,6 @@ components:
           type: string
           nullable: true
           description: Extended editorial description with operational details
-        overview:
-          type: string
-          nullable: true
-          description: Longer editorial overview (translatable via `?lang=`)
-        key_fact:
-          type: string
-          nullable: true
-          description: Short notable fact about the airline (translatable via `?lang=`)
         hq_address:
           type: string
           nullable: true
@@ -344,10 +326,6 @@ components:
           nullable: true
         tiktok_url:
           type: string
-          nullable: true
-        created_at:
-          type: string
-          format: date-time
           nullable: true
         logo:
           $ref: '#/components/schemas/AirlineLogo'
