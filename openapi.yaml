@@ -331,6 +331,56 @@ components:
           $ref: '#/components/schemas/AirlineLogo'
           nullable: true
 
+    AirlineHistoryEvent:
+      type: object
+      properties:
+        event_type:
+          type: string
+          description: "Type of event: predecessor, successor, merger, rebrand, bankruptcy"
+          example: predecessor
+        related_iata:
+          type: string
+          nullable: true
+          example: AZ
+        related_icao:
+          type: string
+          nullable: true
+          example: AZA
+        related_name:
+          type: string
+          nullable: true
+          example: Alitalia
+        year:
+          type: string
+          nullable: true
+          example: "2021"
+        notes:
+          type: string
+          nullable: true
+        source:
+          type: string
+          nullable: true
+          example: wikidata
+
+    AirlineHistoryResponse:
+      type: object
+      properties:
+        iata:
+          type: string
+          nullable: true
+          example: AZ
+        icao:
+          type: string
+          nullable: true
+          example: ITY
+        name:
+          type: string
+          example: ITA Airways
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/AirlineHistoryEvent'
+
     Airport:
       type: object
       properties:
@@ -534,6 +584,39 @@ components:
           example: large_airport
 
 paths:
+  /v1/airlines/history:
+    get:
+      summary: Airline code history & mergers
+      description: |
+        Returns merger, rebrand, bankruptcy, and successor/predecessor events for a given airline.
+        Useful for resolving historical IATA/ICAO codes in flight data analysis.
+
+        Requires **Starter plan or higher**.
+      parameters:
+        - name: iata
+          in: query
+          schema:
+            type: string
+          example: AZ
+          description: Airline IATA code
+        - name: icao
+          in: query
+          schema:
+            type: string
+          example: ITY
+          description: Airline ICAO code
+      responses:
+        '200':
+          description: History events for the airline
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AirlineHistoryResponse'
+        '400':
+          description: Missing iata or icao parameter
+        '404':
+          description: Airline not found
+
   /v1/airlines:
     get:
       summary: List airlines
