@@ -362,6 +362,42 @@ components:
           nullable: true
           example: wikidata
 
+    AirlineCodeHolder:
+      type: object
+      description: An airline that held the queried IATA/ICAO code during a specific period
+      properties:
+        id:
+          type: integer
+          example: 70949
+        iata:
+          type: string
+          nullable: true
+          example: AZ
+        icao:
+          type: string
+          nullable: true
+          example: AZA
+        name:
+          type: string
+          example: Alitalia
+        active_from:
+          type: string
+          nullable: true
+          description: Year the airline started using this code (from commenced_operations or year_founded)
+          example: "1946"
+        active_until:
+          type: string
+          nullable: true
+          description: Year the airline stopped using this code (defunct year), null if still active
+          example: "2021"
+        currently_active:
+          type: boolean
+          example: false
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/AirlineHistoryEvent'
+
     AirlineHistoryResponse:
       type: object
       properties:
@@ -372,14 +408,27 @@ components:
         icao:
           type: string
           nullable: true
-          example: ITY
-        name:
+          example: null
+        year:
           type: string
-          example: ITA Airways
-        events:
+          nullable: true
+          description: Only present when ?year= was provided
+          example: "2018"
+        active_airline:
+          nullable: true
+          description: Only present when ?year= was provided — the airline active in that year
+          allOf:
+            - type: object
+              properties:
+                id: { type: integer }
+                iata: { type: string, nullable: true }
+                icao: { type: string, nullable: true }
+                name: { type: string }
+        code_holders:
           type: array
+          description: All airlines that ever held this IATA/ICAO code, sorted by active_from
           items:
-            $ref: '#/components/schemas/AirlineHistoryEvent'
+            $ref: '#/components/schemas/AirlineCodeHolder'
 
     Airport:
       type: object
