@@ -64,15 +64,18 @@ curl "https://aviation-api.logostream.dev/v1/airlines?country_code=DE" \
     {
       "iata": "LH",
       "icao": "DLH",
+      "three_digit_code": "020",
+      "callsign": "LUFTHANSA",
       "name": "Lufthansa",
-      "marketing_name": "Lufthansa",
-      "country_code": "DE",
+      "type": "full_service",
+      "category": "Passenger",
       "alliance": "star_alliance",
-      "type": "Full service carrier",
+      "airline_group": "Lufthansa Group",
+      "country_code": "DE",
+      "home_region": "Europe",
       "colors": "#05164d",
       "color2": null,
       "text_color": "#fabf15",
-      "is_lowcost": false,
       "is_oneworld": false,
       "is_staralliance": true,
       "is_skyteam": false,
@@ -101,37 +104,44 @@ curl "https://aviation-api.logostream.dev/v1/airlines?country_code=DE" \
 |---|---|---|
 | `iata` | string | IATA 2-letter code |
 | `icao` | string | ICAO 3-letter code |
+| `three_digit_code` | string | IATA 3-digit AWB prefix (e.g. `020` for Lufthansa) |
+| `callsign` | string | ICAO radio callsign (e.g. `LUFTHANSA`) |
 | `name` | string | Official airline name |
-| `marketing_name` | string | Commercial brand name |
-| `country_code` | string | ISO 2-letter country code |
+| `type` | string | Carrier type: `full_service`, `low_cost`, `regional`, `charter`, `cargo`, `helicopter` |
+| `category` | string | `Passenger`, `Cargo`, or `null` |
 | `alliance` | string | `star_alliance`, `oneworld`, `skyteam` or `null` |
-| `type` | string | Carrier type |
+| `airline_group` | string | Parent group (e.g. `Lufthansa Group`) |
+| `country_code` | string | ISO 2-letter country code |
+| `home_region` | string | Geographic region |
+| `hq_address` | string | Headquarters address |
 | `colors` | string | Primary brand color (hex) |
-| `color2` | string | Secondary brand color (hex) |
-| `color3` | string | Tertiary brand color (hex) |
-| `color4` | string | Quaternary brand color (hex) |
-| `color5` | string | Fifth brand color (hex) |
-| `color6` | string | Sixth brand color (hex) |
+| `color2–color6` | string | Additional brand colors (hex) |
 | `text_color` | string | Text color on brand background (hex) |
 | `text_color2` | string | Secondary text color (hex) |
-| `is_lowcost` | boolean | Low-cost carrier flag |
+| `description` | string | Short airline description |
+| `long_description` | string | Extended editorial description |
 | `is_oneworld` | boolean | oneworld member |
 | `is_staralliance` | boolean | Star Alliance member |
 | `is_skyteam` | boolean | SkyTeam member |
+| `year_founded` | integer | Year the airline was founded |
+| `commenced_operations` | string | Year operations commenced |
+| `active` | boolean | Whether the airline is currently operating |
+| `defunct` | string | Year the airline ceased operations (e.g. `"2021"`), or `null` |
+| `defunct_reason` | string | Reason for ceasing operations |
 | `rating_tripadvisor` | number | TripAdvisor rating (1–5) |
 | `rating_skytrax_stars` | number | Skytrax star rating |
 | `website` | string | Official website URL |
-| `description` | string | Short airline description |
-| `long_description` | string | Extended editorial description with operational details |
-| `hq_address` | string | Headquarters address |
+| `phone` | string | Contact phone number |
+| `wikipedia_url` | string | Wikipedia article URL |
 | `instagram_url` | string | Instagram profile URL |
 | `twitter_url` | string | Twitter / X profile URL |
 | `facebook_url` | string | Facebook page URL |
 | `youtube_url` | string | YouTube channel URL |
 | `linkedin_url` | string | LinkedIn company URL |
 | `tiktok_url` | string | TikTok profile URL |
-| `hubs` | array | Curated primary/secondary hub airports. Each entry: `{airport_iata, notes}`. Sourced from the curated [airline_hubs](/docs/api/hubs) table. |
+| `hubs` | array | Curated primary/secondary hub airports. Each entry: `{airport_iata, notes}`. |
 | `focus_cities` | array | Curated focus cities. Same shape as `hubs`. |
+| `fleet_size` | integer | Number of aircraft in the fleet |
 | `logo` | object | Logo paths for the Logo API (see below) |
 
 ### Logo object

@@ -28,6 +28,7 @@
         "data/authentication",
         "data/rate-limits",
         "api/airlines",
+        "api/airline-history",
         "api/airports",
         "api/diagram",
         "api/hubs",

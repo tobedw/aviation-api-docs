@@ -1,0 +1,163 @@
+---
+title: Airline Code History
+description: Resolve historical IATA/ICAO codes — who held a code in a given year, mergers, rebrands, bankruptcies.
+---
+
+## Endpoint
+
+```
+GET /v1/airlines/history
+```
+
+<Note>
+  Requires **Starter plan or higher**.
+</Note>
+
+## Use Case
+
+IATA and ICAO codes are reused over time. When analyzing historical flight data, a code like `AZ` may refer to Alitalia before 2021 and ITA Airways after. This endpoint lets you resolve which airline held a code in any given year, and maps all known mergers, rebrands, and bankruptcies.
+
+## Parameters
+
+| Parameter | Type | Description |
+|---|---|---|
+| `iata` | string | IATA 2-letter code: `AZ` |
+| `icao` | string | ICAO 3-letter code: `AZA` |
+| `year` | string | 4-digit year for time-based lookup: `2018` |
+
+Either `iata` or `icao` is required.
+
+## Examples
+
+<CodeGroup>
+
+```bash Full code history
+curl "https://aviation-api.logostream.dev/v1/airlines/history?iata=AZ" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash Who held this code in 2018?
+curl "https://aviation-api.logostream.dev/v1/airlines/history?iata=AZ&year=2018" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+```bash By ICAO code
+curl "https://aviation-api.logostream.dev/v1/airlines/history?icao=DLH" \
+  -H "x-api-key: YOUR_API_KEY"
+```
+
+</CodeGroup>
+
+## Response — without `year`
+
+Returns all airlines that ever held this code, sorted by `active_from`.
+
+```json
+{
+  "iata": "AZ",
+  "icao": null,
+  "code_holders": [
+    {
+      "id": 70949,
+      "iata": "AZ",
+      "icao": "AZA",
+      "name": "Alitalia",
+      "active_from": "1946",
+      "active_until": "2021",
+      "currently_active": false,
+      "events": [
+        {
+          "event_type": "bankruptcy",
+          "related_iata": "AZ",
+          "related_icao": "ITY",
+          "related_name": "ITA Airways",
+          "year": "2021",
+          "notes": null,
+          "source": "wikidata"
+        }
+      ]
+    },
+    {
+      "id": 71234,
+      "iata": "AZ",
+      "icao": "ITY",
+      "name": "ITA Airways",
+      "active_from": "2021",
+      "active_until": null,
+      "currently_active": true,
+      "events": []
+    }
+  ]
+}
+```
+
+## Response — with `year`
+
+Adds `active_airline` identifying which airline held the code in the requested year.
+
+```json
+{
+  "iata": "AZ",
+  "icao": null,
+  "year": "2018",
+  "active_airline": {
+    "id": 70949,
+    "iata": "AZ",
+    "icao": "AZA",
+    "name": "Alitalia"
+  },
+  "code_holders": [ ... ]
+}
+```
+
+If no airline can be matched to the given year, `active_airline` is `null` (data may be incomplete).
+
+## Response fields
+
+### Top level
+
+| Field | Type | Description |
+|---|---|---|
+| `iata` | string | Queried IATA code |
+| `icao` | string | Queried ICAO code |
+| `year` | string | Only present when `?year=` was provided |
+| `active_airline` | object \| null | Only present when `?year=` was provided |
+| `code_holders` | array | All airlines that ever held this code |
+
+### code_holders[]
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | integer | Internal airline ID |
+| `iata` | string | IATA code |
+| `icao` | string | ICAO code |
+| `name` | string | Airline name |
+| `active_from` | string \| null | Year this airline started using the code |
+| `active_until` | string \| null | Year this airline stopped using the code (`null` = still active) |
+| `currently_active` | boolean | Whether the airline is currently active |
+| `events` | array | Known history events (see below) |
+
+### events[]
+
+| Field | Type | Description |
+|---|---|---|
+| `event_type` | string | `merger`, `acquisition`, `rebrand`, `bankruptcy`, `predecessor`, `successor` |
+| `related_iata` | string \| null | IATA code of the related airline |
+| `related_icao` | string \| null | ICAO code of the related airline |
+| `related_name` | string \| null | Name of the related airline |
+| `year` | string \| null | Year of the event |
+| `notes` | string \| null | Additional context |
+| `source` | string \| null | Data source: `wikidata`, `wikipedia_high`, `wikipedia_medium`, `manual` |
+
+## Data Sources
+
+History events are sourced from three layers, combined and deduplicated:
+
+| Source | Description | Records |
+|---|---|---|
+| `wikidata` | Structured relations via SPARQL (P1366 replaced\_by, P7888 merged into) | ~88 |
+| `wikipedia_high` | Wikipedia extraction cross-validated against Wikidata | ~41 |
+| `wikipedia_medium` | Wikipedia extraction via Claude, IATA resolved from airline database | ~113 |
+| `manual` | Curated entries for major airlines verified against Wikipedia | ~13 |
+
+The `source` field on each event reflects its origin. Higher confidence sources (`wikidata`, `wikipedia_high`) are considered authoritative; `wikipedia_medium` entries should be treated as best-effort.
