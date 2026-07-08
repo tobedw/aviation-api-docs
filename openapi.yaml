@@ -591,6 +591,9 @@ paths:
         Returns merger, rebrand, bankruptcy, and successor/predecessor events for a given airline.
         Useful for resolving historical IATA/ICAO codes in flight data analysis.
 
+        Add `?year=YYYY` to resolve which airline held a given code in a specific year —
+        e.g. `?iata=AZ&year=2018` returns Alitalia (ITA Airways only took over in 2021).
+
         Requires **Starter plan or higher**.
       parameters:
         - name: iata
@@ -605,15 +608,24 @@ paths:
             type: string
           example: ITY
           description: Airline ICAO code
+        - name: year
+          in: query
+          schema:
+            type: string
+            pattern: '^\d{4}$'
+          example: "2018"
+          description: |
+            Filter to which airline held this code in the given year.
+            Uses commenced_operations and defunct fields to determine active period.
       responses:
         '200':
-          description: History events for the airline
+          description: History events for the airline (or time-based lookup result if year provided)
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/AirlineHistoryResponse'
         '400':
-          description: Missing iata or icao parameter
+          description: Missing iata/icao parameter, or invalid year format
         '404':
           description: Airline not found
 
