@@ -23,6 +23,8 @@ info:
 servers:
   - url: https://aviation-api.logostream.dev
     description: Aviation Data API — airlines, airports, cities, countries, routes
+  - url: https://airlines-api.logostream.dev
+    description: Logo & Livery API — airline logos, airport logos, country flags, aircraft liveries
 
 security:
   - ApiKeyAuth: []
@@ -2692,6 +2694,12 @@ paths:
                 $ref: '#/components/schemas/Error'
 
   /airlines/icao/{icao}:
+    servers:
+      - url: https://airlines-api.logostream.dev
+    get:
+      summary: Airline logo by ICAO
+      tags:
+        - Logo API
       parameters:
         - name: icao
           in: path
