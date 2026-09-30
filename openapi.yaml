@@ -2841,7 +2841,11 @@ paths:
           in: query
           schema:
             type: string
-            enum: [icon-transparent, logo, logo-transparent, logo-bg-white, logo-white, tail, tail-3D]
+            enum: [icon-transparent, logo, logo-transparent, logo-bg-white, logo-white, tail, tail-3D, icon-animated]
+            description: |
+              `icon-animated` — animated SVG icon. Pro and Enterprise plans only.
+              Always returned as SVG; `format` and `size` are ignored.
+              Falls back to the static icon if no animation exists (see `X-Asset` header).
         - name: format
           in: query
           schema:
@@ -2854,6 +2858,13 @@ paths:
           schema:
             type: integer
           example: 400
+        - name: loop
+          in: query
+          required: false
+          description: Only with `variant=icon-animated`. `false` returns a play-once animation.
+          schema:
+            type: boolean
+            default: true
       responses:
         '200':
           description: Logo image
@@ -2867,7 +2878,7 @@ paths:
                 type: string
                 format: binary
         '403':
-          description: Invalid API key
+          description: Invalid API key, or plan does not include this feature (airports, liveries, animated icons).
 
   /airlines/iata/{iata}:
     servers:
@@ -2892,7 +2903,11 @@ paths:
           in: query
           schema:
             type: string
-            enum: [icon-transparent, logo, logo-transparent, logo-bg-white, logo-white, tail, tail-3D]
+            enum: [icon-transparent, logo, logo-transparent, logo-bg-white, logo-white, tail, tail-3D, icon-animated]
+            description: |
+              `icon-animated` — animated SVG icon. Pro and Enterprise plans only.
+              Always returned as SVG; `format` and `size` are ignored.
+              Falls back to the static icon if no animation exists (see `X-Asset` header).
         - name: format
           in: query
           schema:
@@ -2904,6 +2919,13 @@ paths:
           schema:
             type: integer
           example: 400
+        - name: loop
+          in: query
+          required: false
+          description: Only with `variant=icon-animated`. `false` returns a play-once animation.
+          schema:
+            type: boolean
+            default: true
       responses:
         '200':
           description: Logo image
@@ -2916,6 +2938,8 @@ paths:
               schema:
                 type: string
                 format: binary
+        '403':
+          description: Invalid API key, or plan does not include this feature (airports, liveries, animated icons).
 
   /airports/icao/{icao}:
     servers:

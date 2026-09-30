@@ -20,6 +20,7 @@ When using an IATA code, the API automatically resolves it to an ICAO code via a
 | `variant` | Logo variant (see below) | `?variant=tail` |
 | `format` | `svg` or `png` | `?format=png` |
 | `size` | PNG output size in pixels | `?size=400` |
+| `loop` | Only with `variant=icon-animated`. `false` or `0` plays the animation once | `?loop=false` |
 | `force` | Bypass cache (`true`) | `?force=true` |
 
 ## Variants
@@ -34,6 +35,35 @@ When using an IATA code, the API automatically resolves it to an ICAO code via a
 | `logo-white` | White version of the logo |
 | `tail` | Tail livery |
 | `tail-3D` | 3D tail livery, falls back to flat tail |
+| `icon-animated` | Animated SVG icon (Pro and Enterprise only, see [Animated icons](#animated-icons)) |
+
+## Animated icons
+
+`variant=icon-animated` returns the airline icon as an animated SVG. It works with ICAO, IATA and AWB prefix identifiers.
+
+- **Plans:** Pro and Enterprise only. Other plans receive `403`. The request is not counted against your quota.
+- **Format:** Always `image/svg+xml`. `format` and `size` are ignored, because rasterizing to PNG would remove the animation.
+- **Fallback:** If no animation exists for an airline, the static icon (default `icon` variant) is returned. Check the `X-Asset` response header to see which file was served.
+- **Embedding:** Use `<img src="…">` or `<object>`. Some environments show only the first frame, e.g. many email clients and some native image views.
+
+### `loop`
+
+Only valid with `variant=icon-animated`.
+
+| Value | Result |
+|---|---|
+| omitted / `true` | Looping animation (default) |
+| `false` or `0` | Plays once |
+
+### Error (plan too low)
+
+```
+HTTP 403
+```
+
+```json
+{ "error": "Animated icons require the Pro plan or higher.", "upgrade": "https://polar.sh/yourorg" }
+```
 
 ## Examples
 
@@ -61,6 +91,14 @@ https://airlines-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&variant=l
 
 ```bash 3D tail as PNG
 https://airlines-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&variant=tail-3D&format=png&size=600
+```
+
+```bash Animated icon (looping)
+https://airlines-api.logostream.dev/airlines/icao/DLH?key=YOUR_API_KEY&variant=icon-animated
+```
+
+```bash Animated icon (play once)
+https://airlines-api.logostream.dev/airlines/iata/LH?key=YOUR_API_KEY&variant=icon-animated&loop=false
 ```
 
 </CodeGroup>
