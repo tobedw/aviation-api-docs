@@ -1,0 +1,13 @@
+{
+  "name": "aviation-api-docs",
+  "private": true,
+  "type": "module",
+  "description": "Static, pre-rendered Scalar API reference for docs.logostream.dev",
+  "scripts": {
+    "build": "node build.mjs"
+  },
+  "devDependencies": {
+    "@scalar/server-side-rendering": "0.1.57",
+    "yaml": "^2.8.0"
+  }
+}
