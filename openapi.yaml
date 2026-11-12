@@ -3395,6 +3395,82 @@ paths:
         '404':
           description: Airport not found or no GeoJSON available
 
+  /v1/airport-diagram/{icao}/scene:
+    get:
+      tags:
+        - Airport Diagrams
+      summary: 3D scene of an airport
+      description: |
+        Returns the 3D scene of an airport as JSON (gzip): runways, taxiways, aprons, terminals, buildings, gates with
+        their aircraft stands, roads and towers, in metres relative to the airport's origin (`x` east, `z` south).
+
+        The scene is made for the `<logostream-airport-3d>` element, which draws it and places aircraft on it:
+
+        ```html
+        <script src="https://airline.logostream.dev/embed/airport-3d.js"></script>
+        <logostream-airport-3d icao="EDDF" embed-key="emb_..."></logostream-airport-3d>
+        <script>
+          document.querySelector('logostream-airport-3d').aircraft = [
+            { gate: 'A26', type: 'A320', airline: 'DLH', status: 'boarding' },
+            { lat: 50.0333, lon: 8.5706, headingDeg: 250, type: 'B77W', airline: 'UAE', registration: 'A6-EGO' },
+          ];
+        </script>
+        ```
+
+        The element reads this route and the tail logo route with an **embed key** (`emb_...`): a browser key that is
+        bound to the origins of your site and reaches only these two routes. Requests count on your API key. Ask
+        support for an embed key. You bring the flight data yourself: gates, positions and status are not part of
+        this API.
+
+        Not available on the Community plan. Scene data: © OpenStreetMap contributors, Overture Maps Foundation,
+        available under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/); each scene
+        names it in its `license` field.
+      operationId: getAirportScene
+      parameters:
+        - name: icao
+          in: path
+          required: true
+          schema:
+            type: string
+          example: EDDF
+      responses:
+        '200':
+          description: Scene JSON
+          content:
+            application/json:
+              schema:
+                type: object
+        '403':
+          description: Wrong origin for an embed key, or a plan without access
+        '404':
+          description: No scene for this airport
+
+  /v1/airport-diagram/tail/{code}:
+    get:
+      tags:
+        - Airport Diagrams
+      summary: Tail logo of an airline for the 3D scene
+      description: Returns the tail logo of an airline as PNG, in the shape of an aircraft fin. The `<logostream-airport-3d>` element loads it for every airline in its aircraft list. Reachable with an embed key.
+      operationId: getAirportSceneTail
+      parameters:
+        - name: code
+          in: path
+          required: true
+          description: ICAO code of the airline (3 characters)
+          schema:
+            type: string
+          example: DLH
+      responses:
+        '200':
+          description: Tail logo
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: No tail logo for this airline
+
   /v1/airport-diagram:
     get:
       tags:
