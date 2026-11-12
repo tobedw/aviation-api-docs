@@ -654,7 +654,7 @@ tags:
       ## Quick start
 
       ```html
-      <script src="https://airline.logostream.dev/embed/airport-3d.js"></script>
+      <script src="https://airline.logostream.dev/embed/v1/airport-3d.js"></script>
 
       <logostream-airport-3d icao="EDDF" embed-key="emb_..."
         style="display:block; height:600px"></logostream-airport-3d>
@@ -668,6 +668,8 @@ tags:
         ];
       </script>
       ```
+
+      Use the `/embed/v1/` address: within `v1` attributes, fields and events do not change in a breaking way.
 
       ## Embed keys
 
@@ -692,8 +694,11 @@ tags:
       |-----------|---------|
       | `icao` | ICAO code of the airport, for example `EDDF`. Changing it loads the other airport. |
       | `embed-key` | Your embed key. |
-      | `theme` | `light` (standard: white and blue) or `clay` (warm, orange accent). |
+      | `theme` | `light` (standard: white and blue), `clay` (warm, orange accent), `night` (dark, lit windows, runway lights) or `auto`: `night` while it is dark at the airport, `light` otherwise. Changing it redraws the map without a new request. |
+      | `palette` | Your own colours on top of the theme, as JSON: `{"accent":"#00aa77","ground":"#eef2f7"}`. Keys: `bg`, `ground`, `apron`, `taxi`, `rwy`, `term`, `bld`, `road`, `park`, `accent`, `glass`, `roof`, `label`. Values are `#rrggbb`. Also the property `map.palette`. |
       | `traffic` | `off` hides the decorative vehicles. |
+      | `labels` | `off` hides the gate numbers painted on the apron. |
+      | `snap` | `off` draws live positions exactly where the data says. Without it, an aircraft on the ground within 15 m of a taxiway or runway centre line is moved onto the line. |
       | `aircraft` | The aircraft list as JSON. Setting the `aircraft` property from JavaScript is the usual way. |
 
       Give the element a height with CSS; it fills its box.
@@ -705,7 +710,7 @@ tags:
 
       | Field | Type | Meaning |
       |-------|------|---------|
-      | `type` | string, required | ICAO aircraft type (`A320`, `B77W`, ...). Five models are drawn; another type shows the nearest one. |
+      | `type` | string, required | ICAO aircraft type (`A320`, `B77W`, ...). Eight models are drawn (narrow-body, four wide-bodies, A380, regional jet, turboprop); another type shows the nearest one. |
       | `gate` | string | Gate of the airport. The aircraft parks at the mapped stand, with a jet bridge. Required unless a position is given. |
       | `lat`, `lon`, `headingDeg` | numbers | Live position instead of a gate: WGS84 degrees and the compass direction of the nose (0 = north, clockwise). All three are needed. |
       | `heightM` | number | Height above the airport ground in metres, for approach and take-off. Convert from altitude above sea level yourself. |
@@ -724,6 +729,29 @@ tags:
       | `setAircraft(list)` | Same as assigning `aircraft`. |
       | `focusOn({ registration })` or `focusOn({ gate })` | Moves the camera to that aircraft, or to the gate when no aircraft matches. An aircraft found by its registration is followed while it moves, until the visitor moves the map. Returns `false` when nothing matches. |
 
+      | `gates` (property) | The gates of the airport as `{ ref, estimated, lat, lon }`, empty before `ready`. `estimated` says the parking position is a guess. |
+      | `project({ registration })` or `project({ gate })` | Where that aircraft or gate is on screen: `{ x, y, onScreen }` in CSS pixels from the element's top left corner, or `null`. For your own markers and labels. |
+
+      ## ADS-B data
+
+      Two helpers turn the answers of common ADS-B sources into the aircraft list. They make no request: you fetch your
+      data, they convert it.
+
+      ```js
+      const Map3D = customElements.get('logostream-airport-3d');
+
+      // readsb, tar1090, dump1090-fa: aircraft.json
+      const json = await fetch('/data/aircraft.json').then((r) => r.json());
+      map.aircraft = Map3D.fromReadsb(json, { elevationM: 111 });
+
+      // OpenSky Network: /states/all
+      map.aircraft = Map3D.fromOpenSky(states, { elevationM: 111, defaultType: 'A320' });
+      ```
+
+      `elevationM` is the airport's elevation above sea level; it is taken off the altitude so that heights are above
+      the ground. Entries without a position or a heading are left out. OpenSky has no aircraft type, and readsb only
+      with its database switched on: such aircraft are drawn as `defaultType`.
+
       ## Events
 
       | Event | `detail` |
@@ -733,8 +761,9 @@ tags:
       | `warnings` | A list of `{ code, gate?, message }` about your aircraft list: `unknown_gate`, `duplicate_gate`, `unknown_type`, `invalid_input`, `outside_scene`, `gate_inside_terminal`, `gate_conflict`. |
       | `aircraft-click` | `{ aircraft, model, x, y, bounds, onScreen }`: a copy of your entry, and where the aircraft is on screen in CSS pixels. |
       | `aircraft-hover` | Same shape; `null` when the pointer leaves an aircraft. |
+      | `view-change` | `null`. Sent once per drawn frame in which the camera moved: reposition your own markers here with `project()`. |
 
-      `aircraft-click` and `aircraft-hover` bubble, the other three do not.
+      `aircraft-click` and `aircraft-hover` bubble, the others do not.
 
       ```js
       map.addEventListener('aircraft-click', (e) => {
@@ -761,7 +790,7 @@ tags:
       Scenes are built from OpenStreetMap and Overture Maps building data and are available under the
       [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/); each scene names it in its `license` field,
       and the element shows the credit line. Where a gate has no mapped aircraft stand, the parking position is an estimate
-      (`guess: true` in the scene). Trees, vehicles and roof units are decoration.
+      (`guess: true` in the scene). Trees, vehicles, roof units and the runway lights of the night theme are decoration.
 
   - name: MCP Server
 paths:
