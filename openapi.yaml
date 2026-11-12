@@ -634,6 +634,125 @@ components:
           nullable: true
           example: large_airport
 
+tags:
+  - name: Aviation Data API
+  - name: Map API
+  - name: Logo API
+  - name: Livery API
+  - name: Airport Diagrams
+  - name: 3D Airport Map (Beta)
+    description: |
+      An embeddable 3D view of an airport that shows **your** flights: aircraft at their gates or at live positions, with tail
+      logos, airline colours and ground traffic. Scenes exist for 700+ airports.
+
+      **Beta.** Open to every plan, the free Community plan included. Fields and scenes can still change.
+      [See the live demo →](https://airline.logostream.dev/airport-3d-map)
+
+      The map holds no flight data. Gates, positions and status come from your own systems or from a flight data provider
+      you already use.
+
+      ## Quick start
+
+      ```html
+      <script src="https://airline.logostream.dev/embed/airport-3d.js"></script>
+
+      <logostream-airport-3d icao="EDDF" embed-key="emb_..."
+        style="display:block; height:600px"></logostream-airport-3d>
+
+      <script>
+        const map = document.querySelector('logostream-airport-3d');
+        map.aircraft = [
+          { gate: 'A26', type: 'A320', airline: 'DLH', status: 'boarding' },
+          { lat: 50.0333, lon: 8.5706, headingDeg: 250, onGround: true,
+            type: 'B77W', airline: 'UAE', registration: 'A6-EGO' },
+        ];
+      </script>
+      ```
+
+      ## Embed keys
+
+      The element loads the scene and the tail logos with an **embed key** (`emb_...`), not with your API key. An embed key
+      is bound to the origins of your site (for example `https://www.example.com`) and reaches only the two routes below,
+      so it may sit in your page source. Embed keys are created by logostream: write to
+      [sales@logostream.dev](mailto:sales@logostream.dev) with your domains. Ask for a second key with
+      `http://localhost:<port>` for development.
+
+      ## Element attributes
+
+      | Attribute | Meaning |
+      |-----------|---------|
+      | `icao` | ICAO code of the airport, for example `EDDF`. Changing it loads the other airport. |
+      | `embed-key` | Your embed key. |
+      | `theme` | `light` (standard: white and blue) or `clay` (warm, orange accent). |
+      | `traffic` | `off` hides the decorative vehicles. |
+      | `aircraft` | The aircraft list as JSON. Setting the `aircraft` property from JavaScript is the usual way. |
+
+      Give the element a height with CSS; it fills its box.
+
+      ## Aircraft list
+
+      Assign an array to `map.aircraft` (or call `map.setAircraft(list)`). Assign a new array for every update: the map
+      redraws only the aircraft, never the airport, and no request is made.
+
+      | Field | Type | Meaning |
+      |-------|------|---------|
+      | `type` | string, required | ICAO aircraft type (`A320`, `B77W`, ...). Five models are drawn; another type shows the nearest one. |
+      | `gate` | string | Gate of the airport. The aircraft parks at the mapped stand, with a jet bridge. Required unless a position is given. |
+      | `lat`, `lon`, `headingDeg` | numbers | Live position instead of a gate: WGS84 degrees and the compass direction of the nose (0 = north, clockwise). All three are needed. |
+      | `heightM` | number | Height above the airport ground in metres, for approach and take-off. Convert from altitude above sea level yourself. |
+      | `onGround` | boolean | `true` puts the aircraft on the ground whatever `heightM` says (pressure altitudes can be off by 100 m). |
+      | `airline` | string | ICAO airline code. Sets the tail logo and the airline's colours. |
+      | `registration` | string | Identifies the aircraft from one list to the next: with it, a moving aircraft glides instead of jumping. |
+      | `status` | string | `arrived`, `boarding`, `departing` or `delayed` draws a status ring. Any other text is passed through to events. |
+
+      An aircraft with a position gets no jet bridge. It jumps instead of gliding without a `registration`, after more than
+      10 seconds without a new list, or over more than 1000 metres.
+
+      ## Methods
+
+      | Method | Does |
+      |--------|------|
+      | `setAircraft(list)` | Same as assigning `aircraft`. |
+      | `focusOn({ registration })` or `focusOn({ gate })` | Moves the camera to that aircraft, or to the gate when no aircraft matches. An aircraft found by its registration is followed while it moves, until the visitor moves the map. Returns `false` when nothing matches. |
+
+      ## Events
+
+      | Event | `detail` |
+      |-------|----------|
+      | `ready` | `{ icao, loadMs, buildMs, totalMs }`. The airport is drawn. |
+      | `error` | `{ code }`, one of `unauthorized`, `no_scene`, `quota`, `network`, `server`, `invalid_response`, `unsupported_scene_version`, `config`, `webgl`. The element shows a message itself. |
+      | `warnings` | A list of `{ code, gate?, message }` about your aircraft list: `unknown_gate`, `duplicate_gate`, `unknown_type`, `invalid_input`, `outside_scene`, `gate_inside_terminal`, `gate_conflict`. |
+      | `aircraft-click` | `{ aircraft, model, x, y, bounds, onScreen }`: a copy of your entry, and where the aircraft is on screen in CSS pixels. |
+      | `aircraft-hover` | Same shape; `null` when the pointer leaves an aircraft. |
+
+      `aircraft-click` and `aircraft-hover` bubble, the other three do not.
+
+      ```js
+      map.addEventListener('aircraft-click', (e) => {
+        if (!e.detail) return;
+        const { aircraft, x, y } = e.detail;
+        openFlightCard(aircraft.registration ?? aircraft.gate, x, y);
+      });
+      ```
+
+      ## How requests are counted
+
+      - One request for the scene and one per airline for its tail logo, each time the element loads an airport. They count
+        on the API key your embed key belongs to.
+      - Updating the aircraft list costs nothing: it happens in the browser.
+      - Paid plans: the browser keeps the scene for an hour and tail logos for a day. Community plan: answers are not
+        cached, so every page view counts.
+      - An embed key may use up to 20 % of your monthly quota (at least 1000 requests). Ask us for another cap.
+      - At most 120 requests per minute per embed key and visitor IP.
+
+      ## Map data and licence
+
+      Scenes are built from OpenStreetMap and Overture Maps building data and are available under the
+      [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/); each scene names it in its `license` field,
+      and the element shows the credit line. Where a gate has no mapped aircraft stand, the parking position is an estimate
+      (`guess: true` in the scene). Trees, vehicles and roof units are decoration.
+
+  - name: MCP Server
 paths:
   /v1/airlines/history:
     get:
@@ -3398,33 +3517,16 @@ paths:
   /v1/airport-diagram/{icao}/scene:
     get:
       tags:
-        - Airport Diagrams
+        - 3D Airport Map (Beta)
       summary: 3D scene of an airport
       description: |
         Returns the 3D scene of an airport as JSON (gzip): runways, taxiways, aprons, terminals, buildings, gates with
         their aircraft stands, roads and towers, in metres relative to the airport's origin (`x` east, `z` south).
+        The `<logostream-airport-3d>` element calls this route for you; see the section above.
 
-        The scene is made for the `<logostream-airport-3d>` element, which draws it and places aircraft on it:
-
-        ```html
-        <script src="https://airline.logostream.dev/embed/airport-3d.js"></script>
-        <logostream-airport-3d icao="EDDF" embed-key="emb_..."></logostream-airport-3d>
-        <script>
-          document.querySelector('logostream-airport-3d').aircraft = [
-            { gate: 'A26', type: 'A320', airline: 'DLH', status: 'boarding' },
-            { lat: 50.0333, lon: 8.5706, headingDeg: 250, type: 'B77W', airline: 'UAE', registration: 'A6-EGO' },
-          ];
-        </script>
-        ```
-
-        The element reads this route and the tail logo route with an **embed key** (`emb_...`): a browser key that is
-        bound to the origins of your site and reaches only these two routes. Requests count on your API key. Ask
-        support for an embed key. You bring the flight data yourself: gates, positions and status are not part of
-        this API.
-
-        Not available on the Community plan. Scene data: © OpenStreetMap contributors, Overture Maps Foundation,
-        available under the [Open Database License](https://opendatacommons.org/licenses/odbl/1-0/); each scene
-        names it in its `license` field.
+        Reachable with an embed key (the browser must send an `Origin` the key is bound to) or with a normal API key.
+        Open to every plan during the beta. Data: © OpenStreetMap contributors, Overture Maps Foundation, under the
+        Open Database License.
       operationId: getAirportScene
       parameters:
         - name: icao
@@ -3441,14 +3543,16 @@ paths:
               schema:
                 type: object
         '403':
-          description: Wrong origin for an embed key, or a plan without access
+          description: Wrong origin for an embed key
+        '429':
+          description: Request limit reached (monthly quota, the embed key's cap, or the per-minute limit)
         '404':
           description: No scene for this airport
 
   /v1/airport-diagram/tail/{code}:
     get:
       tags:
-        - Airport Diagrams
+        - 3D Airport Map (Beta)
       summary: Tail logo of an airline for the 3D scene
       description: Returns the tail logo of an airline as PNG, in the shape of an aircraft fin. The `<logostream-airport-3d>` element loads it for every airline in its aircraft list. Reachable with an embed key.
       operationId: getAirportSceneTail
