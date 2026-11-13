@@ -672,10 +672,19 @@ tags:
       ## Embed keys
 
       The element loads the scene and the tail logos with an **embed key** (`emb_...`), not with your API key. An embed key
-      is bound to the origins of your site (for example `https://www.example.com`) and reaches only the two routes below,
-      so it may sit in your page source. Embed keys are created by logostream: write to
-      [sales@logostream.dev](mailto:sales@logostream.dev) with your domains. Ask for a second key with
-      `http://localhost:<port>` for development.
+      is bound to the origins of your site (for example `https://www.example.com`) and reaches only the scene and tail
+      logo routes, so it may sit in your page source.
+
+      You create embed keys yourself, with your API key: use the form on the
+      [3D Airport Map page](https://airline.logostream.dev/airport-3d-map#embed-key) or call `POST /v1/embed-keys`
+      (below). One API key holds up to 10 active embed keys. Create a separate one with `http://localhost:<port>` for
+      development and deactivate it when you are done.
+
+      ```bash
+      curl -X POST https://aviation-api.logostream.dev/v1/embed-keys \
+        -H "x-api-key: YOUR_API_KEY" -H "content-type: application/json" \
+        -d '{"origins":["https://www.example.com"],"label":"website"}'
+      ```
 
       ## Element attributes
 
@@ -742,7 +751,9 @@ tags:
       - Updating the aircraft list costs nothing: it happens in the browser.
       - Paid plans: the browser keeps the scene for an hour and tail logos for a day. Community plan: answers are not
         cached, so every page view counts.
-      - An embed key may use up to 20 % of your monthly quota (at least 1000 requests). Ask us for another cap.
+      - An embed key may use up to 20 % of your monthly quota (at least 1000 requests). Set another cap with
+        `monthly_cap` when you create it.
+      - Creating, listing and deactivating embed keys is not counted.
       - At most 120 requests per minute per embed key and visitor IP.
 
       ## Map data and licence
@@ -3513,6 +3524,97 @@ paths:
                 type: object
         '404':
           description: Airport not found or no GeoJSON available
+
+  /v1/embed-keys:
+    get:
+      tags:
+        - 3D Airport Map (Beta)
+      summary: List your embed keys
+      description: Returns the embed keys of the API key you call with, newest first. Not counted on your monthly quota.
+      operationId: listEmbedKeys
+      responses:
+        '200':
+          description: Your embed keys
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count: { type: integer }
+                  max_active: { type: integer, example: 10 }
+                  keys:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        key: { type: string, example: emb_0123456789abcdef0123456789abcdef }
+                        origins: { type: array, items: { type: string }, example: ['https://www.example.com'] }
+                        label: { type: string, nullable: true }
+                        active: { type: boolean }
+                        created_at: { type: string, format: date-time }
+                        monthly_cap: { type: integer, nullable: true }
+                        used_this_month: { type: integer, nullable: true }
+    post:
+      tags:
+        - 3D Airport Map (Beta)
+      summary: Create an embed key
+      description: |
+        Creates an embed key that belongs to the API key you call with. Call it from your server or a terminal, not from
+        a public page: it needs your API key. Not counted on your monthly quota.
+
+        `origins`: 1 to 20 entries of the form `https://host[:port]`. `http` is allowed for `localhost` only. No paths,
+        no wildcards, no IP addresses; a sub domain is a different origin.
+      operationId: createEmbedKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [origins]
+              properties:
+                origins: { type: array, items: { type: string }, example: ['https://www.example.com'] }
+                label: { type: string, maxLength: 80, example: website }
+                monthly_cap: { type: integer, description: 'Most requests per month for this embed key, from 1 to your monthly limit. Default: 20 % of the limit, at least 1000.', example: 5000 }
+      responses:
+        '201':
+          description: The embed key
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key: { type: string, example: emb_0123456789abcdef0123456789abcdef }
+                  origins: { type: array, items: { type: string } }
+                  label: { type: string, nullable: true }
+                  created_at: { type: string, format: date-time }
+                  monthly_cap: { type: integer }
+        '400':
+          description: Invalid origins, label or cap, or 10 active embed keys already exist
+        '403':
+          description: Called with an embed key, or the API key is inactive
+
+  /v1/embed-keys/deactivate:
+    post:
+      tags:
+        - 3D Airport Map (Beta)
+      summary: Deactivate an embed key
+      description: Switches off one of your embed keys. It then answers 401 everywhere. Not counted on your monthly quota.
+      operationId: deactivateEmbedKey
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [key]
+              properties:
+                key: { type: string, example: emb_0123456789abcdef0123456789abcdef }
+      responses:
+        '200':
+          description: Deactivated (also when it already was)
+        '404':
+          description: Not one of your embed keys
 
   /v1/airport-diagram/{icao}/scene:
     get:
